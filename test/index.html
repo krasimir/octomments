@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+    .container {
+      padding: 2em;
+    }
+    img {
+      width: 40px;
+    }
+    .comment {
+      margin: 0 0 1em 0;
+      padding: 1em;
+      border: solid 1px #b0b0b0;
+      border-radius: 6px;
+    }
+    .comment img {
+      width: 20px;
+      float: left;
+    }
+    .comment span {
+      line-height: 0;
+      font-size: 1.2em;
+      display: inline-block;
+      margin: 0 0 0 1em;
+    }
+    .comment hr {
+      border-top: none;
+      border-bottom: solid 1px #999;
+      margin: .5em 0;
+    }
+    .comments {
+      margin: 0 0 2em 0;
+    }
+    textarea {
+      width: 300px;
+      height: 200px;
+      display: block;
+      margin: 0 0 1em 0;
+    }
+    button {
+      padding: 1em;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="comments"></div>
+    <textarea></textarea>
+    <button>comment</button>
+  </div>
+  <script src="../octomments.js"></script>
+  <script>    
+    function render(data) {
+      document.querySelector('#comments').innerHTML = data.comments.map(comment => {
+        return `
+          <div class="comment">
+            <p>
+              <img src="${ comment.author.avatar }" />
+              <span>${ comment.author.name }</span>
+            </p>
+            <hr />
+            ${ comment.text }
+          </div>
+        `;
+      }).join('');
+    }
+
+    const comments = Octomments({
+      githubClientId: '06615e67c519e3f6df59',
+      getTokenURL: 'http://localhost:3000/blog/login',
+      owner: 'krasimir',
+      repo: 'ktcom-comments',
+      issue: 1
+    });
+
+    /*
+    comments.get(1).then(data => {
+      console.log(JSON.stringify(data, null, 2))
+      render({
+        comments: data
+      });
+    })
+    */
+
+    document.querySelector('button').addEventListener('click', () => {
+      const text = document.querySelector('textarea').value;
+
+      comments.add(text);
+    });
+  </script>
+</body>
+</html>

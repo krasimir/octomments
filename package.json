@@ -1,0 +1,37 @@
+{
+  "name": "octomments",
+  "version": "0.1.0",
+  "description": "A small library that offers GitHub issues as comments for your site/blog",
+  "main": "octomments.js",
+  "scripts": {
+    "dev": "./node_modules/.bin/rollup -w -c",
+    "release": "./node_modules/.bin/rollup -c && ./node_modules/.bin/uglifyjs --compress --mangle --output octomments.min.js -- octomments.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/krasimir/octomments.git"
+  },
+  "keywords": [
+    "github",
+    "issues",
+    "comments",
+    "api"
+  ],
+  "author": "Krasimir Tsonev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/krasimir/octomments/issues"
+  },
+  "homepage": "https://github.com/krasimir/octomments",
+  "devDependencies": {
+    "@babel/core": "7.8.0",
+    "@babel/preset-env": "7.7.7",
+    "@rollup/plugin-commonjs": "11.0.1",
+    "@rollup/plugin-node-resolve": "7.0.0",
+    "md.js": "0.2.6",
+    "rollup": "1.29.0",
+    "rollup-plugin-babel": "4.3.3",
+    "uglify-js": "3.7.5"
+  },
+  "dependencies": {}
+}
