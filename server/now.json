@@ -3,21 +3,13 @@
   "version": 2,
   "builds": [
     { "src": "assets/*.*", "use": "@now/static" },
-    { "src": "get-token.js", "use": "@now/node" },
+    { "src": "api/*.*", "use": "@now/node" },
     { "src": "page/index.html", "use": "@now/static" }
   ],
   "routes": [
-    {
-      "src": "/login",
-      "dest": "/get-token.js",
-      "headers": {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "X-Requested-With, Access-Control-Allow-Origin, X-HTTP-Method-Override, Content-Type, Cache-Control, Authorization, Accept"
-      }
-    },
+    { "src": "/octomments/issue", "dest": "/api/issue.js" },
+    { "src": "/octomments/login", "dest": "/api/token.js" },
     { "src": "/assets/(.*)", "dest": "assets/$1" },
-    {
-      "src": "/(.*)", "dest": "page/index.html"
-    }
+    { "src": "/(.*)", "dest": "page/index.html" }
   ]
 }

@@ -29,7 +29,7 @@ const getToken = async code => {
 module.exports = async (req, res) => {
   const { query } = parse(req.url, true);
   const { code } = query;
-  console.log('-------');
+
   try {
     const token = await getToken(code);
     console.log(token);

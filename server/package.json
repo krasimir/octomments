@@ -10,6 +10,8 @@
   "author": "Krasimir Tsonev",
   "license": "MIT",
   "dependencies": {
+    "marked": "0.8.0",
+    "micro": "9.3.4",
     "superagent": "5.2.1"
   }
 }
