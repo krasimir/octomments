@@ -262,7 +262,7 @@
 	  }
 	}
 
-	var OCTOMMENTS_GH_USER = 'OCTOMMENTS_GH_USER';
+	var OCTOMMENTS_GH_TOKEN = 'OCTOMMENTS_GH_TOKEN';
 	var OCTOMMENTS_TEXT = 'OCTOMMENTS_TEXT';
 	var S = Storage();
 
@@ -313,7 +313,7 @@
 	  _onLoggedIn = _onLoggedIn || function () {};
 
 	  var endpointIssues = 'https://api.github.com/repos/' + owner + '/' + repo + '/issues/' + issue;
-	  var user = S.getItem(OCTOMMENTS_GH_USER);
+	  var token = S.getItem(OCTOMMENTS_GH_TOKEN);
 
 	  function getAuthenticationURL() {
 	    var params = ['client_id=' + githubClientId, 'redirect_uri=' + encodeURI(window.location.href)];
@@ -321,13 +321,19 @@
 	  }
 
 	  function getToken(code, callback) {
-	    fetch(getTokenURL + '?' + code + '&CID=' + githubClientId).then(function (r) {
-	      return r.json;
-	    }).then(function (result) {
-	      callback(null, result);
-	    })["catch"](function (error) {
-	      callback(error);
-	    });
+	    fetch(getTokenURL + '?' + code + '&CID=' + githubClientId).then(function (r, error) {
+	      if (error) {
+	        callback(error);
+	      } else {
+	        return r.json();
+	      }
+	    }).then(function (result, error) {
+	      if (error || result && result.error) {
+	        callback(new Error(result.error));
+	      } else {
+	        callback(null, result);
+	      }
+	    })["catch"](callback);
 	  }
 
 	  function addComment(text) {
@@ -337,7 +343,7 @@
 	        body: text
 	      }),
 	      headers: {
-	        'Authorization': 'token ' + user.token
+	        'Authorization': 'token ' + token
 	      }
 	    }).then(function (r) {
 	      return r.json;
@@ -372,7 +378,7 @@
 	      });
 	    },
 	    add: function add(text) {
-	      if (!user) {
+	      if (!token) {
 	        S.setItem(OCTOMMENTS_TEXT, text);
 	        window.location.href = getAuthenticationURL();
 	      } else {
@@ -386,22 +392,18 @@
 	  var code = getParameterByName('code', window.location.href);
 
 	  if (code) {
-	    getToken(code, function (error, u) {
+	    getToken(code, function (error, t) {
 	      if (error) {
 	        _onError(error);
 	      } else {
-	        user = u;
-	        S.setItem(OCTOMMENTS_GH_USER, u);
+	        token = t;
+	        S.setItem(OCTOMMENTS_GH_TOKEN, t);
 
-	        _onLoggedIn(u);
+	        _onLoggedIn(t);
 
 	        _onError(error);
 	      }
 	    });
-	  }
-
-	  if (user) {
-	    _onLoggedIn(user);
 	  }
 
 	  return api;

@@ -1,0 +1,17 @@
+{
+  "name": "octomments",
+  "version": 2,
+  "builds": [
+    { "src": "octomments.js", "use": "@now/node" }
+  ],
+  "routes": [
+    {
+      "src": "/login",
+      "dest": "/octomments.js",
+      "headers": {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "X-Requested-With, Access-Control-Allow-Origin, X-HTTP-Method-Override, Content-Type, Cache-Control, Authorization, Accept"
+      }
+    }
+  ]
+}

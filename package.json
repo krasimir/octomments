@@ -5,7 +5,9 @@
   "main": "octomments.js",
   "scripts": {
     "dev": "./node_modules/.bin/rollup -w -c",
-    "release": "./node_modules/.bin/rollup -c && ./node_modules/.bin/uglifyjs --compress --mangle --output octomments.min.js -- octomments.js"
+    "release": "./node_modules/.bin/rollup -c && ./node_modules/.bin/uglifyjs --compress --mangle --output octomments.min.js -- octomments.js",
+    "lint": "eslint ./server && eslint ./client",
+    "lint:fix": "eslint ./server --fix && eslint ./client --fix"
   },
   "repository": {
     "type": "git",
@@ -28,7 +30,19 @@
     "@babel/preset-env": "7.7.7",
     "@rollup/plugin-commonjs": "11.0.1",
     "@rollup/plugin-node-resolve": "7.0.0",
+    "babel-eslint": "9.0.0",
+    "eslint": "5.16.0",
+    "eslint-config-airbnb": "17.1.1",
+    "eslint-config-prettier": "4.3.0",
+    "eslint-config-wesbos": "0.0.19",
+    "eslint-plugin-html": "5.0.5",
+    "eslint-plugin-import": "2.20.0",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-prettier": "3.1.2",
+    "eslint-plugin-react": "7.18.0",
+    "eslint-plugin-react-hooks": "1.7.0",
     "md.js": "0.2.6",
+    "prettier": "1.19.1",
     "rollup": "1.29.0",
     "rollup-plugin-babel": "4.3.3",
     "uglify-js": "3.7.5"
