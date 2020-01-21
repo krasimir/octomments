@@ -8,7 +8,7 @@
   ],
   "routes": [
     { "src": "/octomments/issue", "dest": "/api/issue.js" },
-    { "src": "/octomments/login", "dest": "/api/token.js" },
+    { "src": "/octomments/token", "dest": "/api/token.js" },
     { "src": "/assets/(.*)", "dest": "assets/$1" },
     { "src": "/(.*)", "dest": "page/index.html" }
   ]

@@ -1,0 +1,10 @@
+{
+  "addingNewIssueSecret": "...",
+  "github": {
+    "owner": "...",
+    "repo": "...",
+    "token": "...",
+    "id": "...",
+    "secret": "..."
+  }
+}

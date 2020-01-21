@@ -34,7 +34,12 @@ function normalizeIssue(graphQLResponse) {
       number: entry.number,
       title: entry.title,
       body: marked(entry.body),
-      comments: entry.comments && entry.comments.nodes ? entry.comments.nodes : []
+      comments: entry.comments && entry.comments.nodes ?
+        entry.comments.nodes.map(comment => ({
+          author: comment.author,
+          body: marked(comment.body)
+        })) :
+        []
     }
   }
 }

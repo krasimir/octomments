@@ -57,48 +57,74 @@
 <body>
   <div class="container">
     <div id="comments"></div>
-    <textarea></textarea>
-    <button>comment</button>
+    <div id="new-comment"></div>
   </div>
   <script src="/assets/octomments.js"></script>
   <script>    
-    function render(data) {
-      document.querySelector('#comments').innerHTML = data.comments.map(comment => {
-        return `
-          <div class="comment">
-            <p>
-              <img src="${ comment.author.avatar }" />
-              <span>${ comment.author.name }</span>
-            </p>
-            <hr />
-            ${ comment.text }
-          </div>
-        `;
-      }).join('');
+    function render(comments) {
+      document.querySelector('#comments').innerHTML = comments;
     }
 
     const comments = Octomments({
       githubClientId: '06615e67c519e3f6df59',
-      getTokenURL: 'http://localhost:3000/blog/login',
-      owner: 'krasimir',
-      repo: 'ktcom-comments',
-      id: 456
+      endpoints: {
+        issue: 'http://localhost:3000/octomments/issue',
+        token: 'http://localhost:3000/octomments/token'
+      },
+      id: 2342,
+      on(type, payload, other) {
+        switch(type) {
+          case Octomments.LOADING_COMMENTS:
+            render('<div class="comment">Loading comments ...</div>');
+          break;
+          case Octomments.COMMENTS_LOADED:
+            render(payload.map(comment => {
+              return `
+                <div class="comment">
+                  <p>
+                    <img src="${ comment.author.avatarUrl }" />
+                    <span>${ comment.author.login }</span>
+                  </p>
+                  <hr />
+                  ${ comment.body }
+                </div>
+              `;
+            }).join(''))
+          break;
+          case Octomments.COMMENTS_ERROR:
+            render('<div class="comment">Error ' + payload + '</div>');
+          break;
+          case Octomments.NO_GITHUB_ISSUE_CREATED:
+            render('<div class="comment">No GitHub issue created.</div>');
+          break;
+          case Octomments.LOADING_CURRENT_USER:
+            
+          break;
+          case Octomments.NO_CURRENT_USER:
+            document.querySelector('#new-comment').innerHTML = `
+              <a href="${payload}">Log in (via GitHub)</a>
+            `;
+          break;
+          case Octomments.USER_ERROR:
+            document.querySelector('#new-comment').innerHTML = `
+              Error loading your data. Wait a bit and try again.<br />
+              <a href="${payload}">Log in (via GitHub)</a>
+            `;
+          break;
+          case Octomments.USER_LOADED:
+            console.log(payload)
+          break;
+        }
+      }
     });
 
     /*
-    comments.get(1).then(data => {
-      console.log(JSON.stringify(data, null, 2))
-      render({
-        comments: data
-      });
-    })
-    */
-
     document.querySelector('button').addEventListener('click', () => {
       const text = document.querySelector('textarea').value;
 
       comments.add(text);
     });
+    */
   </script>
 </body>
 </html>

@@ -27,241 +27,6 @@
     };
   }
 
-  function createCommonjsModule(fn, module) {
-  	return module = { exports: {} }, fn(module, module.exports), module.exports;
-  }
-
-  var md = createCommonjsModule(function (module, exports) {
-  /*!
-   *             __
-   *   __ _  ___/ /
-   *  /  ' \/ _  / 
-   * /_/_/_/\_,_/ 
-   * 
-   * md.js is a lightweight markdown parser
-   * https://github.com/thysultan/md.js
-   * 
-   * @licence MIT
-   */
-  (function (factory) {
-  	{
-  		module.exports = factory();
-  	}
-  }(function () {
-  	var unicodes = {
-  		'<': '&lt;',
-  		'>': '&gt;',
-  		'"': '&quot;',
-  		"'": '&#39;',
-  		'&': '&amp;',
-  		'[': '&#91;',
-  		']': '&#93;',
-  		'(': '&#40;',
-  		')': '&#41;',
-  	};
-
-  	var resc = /[<>&\(\)\[\]"']/g;
-
-  	function unicode (char) { return unicodes[char] || char; }
-
-  	var XSSFilterRegExp = /<(script)[^\0]*?>([^\0]+?)<\/(script)>/gmi;
-  	var XSSFilterTemplate = '&lt;$1&gt;$2&lt;/$3&gt;';
-
-  	var XSSFilterInlineJSRegExp = /(<.*? [^\0]*?=[^\0]*?)(javascript:.*?)(.*>)/gmi;
-  	var XSSFilterInlineJSTemplate = '$1#$2&#58;$3';
-
-  	var XSSFilterImageRegExp = /<img([^\0]*?onerror=)([^\0]*?)>/gmi;
-  	var XSSFilterImageTemplate = function (match, group1, group2) {
-  		return '<img' + group1 + group2.replace(resc, unicode) + '>';
-  	};
-
-  	var removeTabsRegExp = /^[\t ]+|[\t ]$/gm;
-
-  	var htmlFilterRegExp = /(<.*>[\t ]*\n^.*)/gm;
-  	var htmlFilterTemplate = function (match, group1) { 
-  		return group1.replace(/^\n|$\n/gm, '');
-  	};
-
-  	var cssFilterRegExp = /(<style>[^]*<\/style>)/gm;
-  	var cssFilterTemplate = htmlFilterTemplate;
-
-  	var eventsFilterRegExp = /(<[^]+?)(on.*?=.*?)(.*>)/gm;
-  	var eventsFilterTemplate = '$1$3';
-
-  	var blockQuotesRegExp = /^[ \t]*> (.*)/gm;
-  	var blockQuotesTemplate = '<blockquote>$1</blockquote>';
-
-  	var inlineCodeRegExp = /`([^`]+?)`/g;
-  	var inlineCodeTemplate = function (match, group1) {
-  		return '<code>'+group1.replace(resc, unicode)+'</code>'
-  	};
-
-  	var blockCodeRegExp = /```(.*)\n([^\0]+?)```(?!```)/gm;
-
-  	var imagesRegExp = /!\[(.*)\]\((.*)\)/g;
-  	var imagesTemplate = function (match, group1, group2) {
-  		var src = group2.replace(resc, unicode);
-  		var alt = group1.replace(resc, unicode);
-
-  		return '<img src="'+src+'" alt="'+alt+'">';
-  	};
-
-  	var headingsRegExp = /^(#+) +(.*)/gm;
-  	var headingsTemplate = function (match, hash, content) {
-  		var length = hash.length; return '<h'+length+'>'+content+'</h'+length+'>';
-  	};
-
-  	var headingsCommonh2RegExp = /^([^\n\t ])(.*)\n----+/gm;
-  	var headingsCommonh1RegExp = /^([^\n\t ])(.*)\n====+/gm;
-  	var headingsCommonh1Template = '<h1>$1$2</h1>';
-  	var headingsCommonh2Template = '<h2>$1$2</h2>';
-
-  	var paragraphsRegExp = /^([^-><#\d\+\_\*\t\n\[\! \{])([^]*?)(|  )(?:\n\n)/gm;
-  	var paragraphsTemplate = function (match, group1, group2, group3) {
-  		var leadingCharater = group1;
-  		var body = group2;
-  		
-  		var trailingSpace = group3 ? '\n<br>\n' : '\n';
-  		return '<p>'+leadingCharater+body+'</p>'+trailingSpace;
-  	};
-
-  	var horizontalRegExp = /^.*?(?:---|\*\*\*|- - -|\* \* \*)/gm;
-  	var horizontalTemplate = '<hr>';
-
-  	var strongRegExp = /(?:\*\*|\_\_)([^\*\n_]+?)(?:\*\*|\_\_)/g;
-  	var strongTemplate = '<strong>$1</strong>';
-
-  	var emphasisRegExp = /(?:\*|\_)([^\*\n_]+?)(?:\*|\_)/g;
-  	var emphasisTemplate = '<em>$1</em>';
-
-  	var strikeRegExp = /(?:~~)([^~]+?)(?:~~)/g;
-  	var strikeTemplate = '<del>$1</del>';
-
-  	var linksRegExp = /\[(.*?)\]\(([^\t\n ]*)(?:| "(.*)")\)+/gm;
-  	var linksTemplate = function (match, group1, group2, group3) {
-  		var link = group2.replace(resc, unicode);
-  		var text = group1.replace(resc, unicode);
-  		var title = group3 ? ' title="'+group3.replace(resc, unicode)+'"' : '';
-
-  		return '<a href="'+link+'"'+title+'>'+text+'</a>';
-  	};
-
-  	var listUlRegExp1 = /^[\t ]*?(?:-|\+|\*) (.*)/gm;
-  	var listUlRegExp2 = /(\<\/ul\>\n(.*)\<ul\>*)+/g;
-  	var listUlTemplate = '<ul><li>$1</li></ul>';
-
-  	var listOlRegExp1 = /^[\t ]*?(?:\d(?:\)|\.)) (.*)/gm;
-  	var listOlRegExp2 = /(\<\/ol\>\n(.*)\<ol\>*)+/g;
-  	var listOlTemplate = '<ol><li>$1</li></ol>';
-
-  	var lineBreaksRegExp = /^\n\n+/gm;
-  	var lineBreaksTemplate = '<br>';
-
-  	var checkBoxesRegExp = /\[( |x)\]/g;
-  	var checkBoxesTemplate = function (match, group1) {
-  		return '<input type="checkbox" disabled' + (group1.toLowerCase() === 'x' ? ' checked' : '') + '>'
-  	};
-
-
-  	/**
-  	 * markdown parser
-  	 * 
-  	 * @param  {string} markdown
-  	 * @return {string}
-  	 */
-  	function md (markdown) {
-  		if (!markdown) {
-  			return '';
-  		}
-
-  		var code = [];
-  		var index = 0;
-  		var length = markdown.length;
-
-  		// to allow matching trailing paragraphs
-  		if (markdown[length-1] !== '\n' && markdown[length-2] !== '\n') {
-  			markdown += '\n\n';
-  		}
-
-  		// format, removes tabs, leading and trailing spaces
-  		markdown = (
-  			markdown
-  				// collect code blocks and replace with placeholder
-  				// we do this to avoid code blocks matching the paragraph regexp
-  				.replace(blockCodeRegExp, function (match, lang, block) {
-  					var placeholder = '{code-block-'+index+'}';
-  					var regex = new RegExp('{code-block-'+index+'}', 'g');
-
-  					code[index++] = {lang: lang, block: block.replace(resc, unicode), regex: regex};
-
-  					return placeholder;
-  				})
-  				// XSS script tags
-  				.replace(XSSFilterRegExp, XSSFilterTemplate)
-  				// XSS image onerror
-  				.replace(XSSFilterImageRegExp, XSSFilterImageTemplate)
-  				// filter events
-  				.replace(eventsFilterRegExp, eventsFilterTemplate)
-  				// tabs
-  				.replace(removeTabsRegExp, '')
-  				// blockquotes
-  				.replace(blockQuotesRegExp, blockQuotesTemplate)
-  				// images
-  				.replace(imagesRegExp, imagesTemplate)
-  				// headings
-  				.replace(headingsRegExp, headingsTemplate)
-  				// headings h1 (commonmark)
-  				.replace(headingsCommonh1RegExp, headingsCommonh1Template)
-  				// headings h2 (commonmark)
-  				.replace(headingsCommonh2RegExp, headingsCommonh2Template)
-  				// horizontal rule 
-  				.replace(horizontalRegExp, horizontalTemplate)
-  				// checkboxes
-  				.replace(checkBoxesRegExp, checkBoxesTemplate)
-  				// filter html
-  				.replace(htmlFilterRegExp, htmlFilterTemplate)
-  				// filter css
-  				.replace(cssFilterRegExp, cssFilterTemplate)
-  				// paragraphs
-  				.replace(paragraphsRegExp, paragraphsTemplate)
-  				// inline code
-  				.replace(inlineCodeRegExp, inlineCodeTemplate)
-  				// links
-  				.replace(linksRegExp, linksTemplate)
-  				// unorderd lists
-  				.replace(listUlRegExp1, listUlTemplate).replace(listUlRegExp2, '')
-  				// ordered lists
-  				.replace(listOlRegExp1, listOlTemplate).replace(listOlRegExp2, '')
-  				// strong
-  				.replace(strongRegExp, strongTemplate)
-  				// emphasis
-  				.replace(emphasisRegExp, emphasisTemplate)
-  				// strike through
-  				.replace(strikeRegExp, strikeTemplate)
-  				// line breaks
-  				.replace(lineBreaksRegExp, lineBreaksTemplate)
-  				// filter inline js
-  				.replace(XSSFilterInlineJSRegExp, XSSFilterInlineJSTemplate)
-  		);
-
-  		// replace code block placeholders
-  		for (var i = 0; i < index; i++) {
-  			var item = code[i];
-  			var lang = item.lang;
-  			var block = item.block;
-
-  			markdown = markdown.replace(item.regex, function (match) {
-  				return '<pre><code class="language-'+lang+'">'+block+'</code></pre>';
-  			});
-  		}
-
-  		return markdown.trim();
-  	}
-
-  	return md;
-  }));
-  });
-
   function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');
@@ -271,142 +36,99 @@
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
-
-  function normalizeUser(user) {
-    return {
-      name: user.login,
-      avatar: user.avatar_url,
-      url: user.html_url
-    };
+  function suggestIssueCreation(id, endpoint) {
+    console.log("Octomments: Here is a curl request to create the missing GitHub Issue. Make sure that you feel the empty fields:\n\ncurl --location --request POST '".concat(endpoint, "' --header 'Content-Type: application/json' --data-raw '{\"id\": \"").concat(id, "\", \"title\": \"\", \"text\": \"\", \"secret\": \"\"}'\n\n"));
+  }
+  function getAuthenticationURL(githubClientId) {
+    var params = ["client_id=".concat(githubClientId), "redirect_uri=".concat("".concat(encodeURI(window.location.href), "#comments"))];
+    return "https://github.com/login/oauth/authorize?".concat(params.join('&'));
   }
 
-  function normalizeComment(comment) {
-    return {
-      author: normalizeUser(comment.user),
-      text: md(comment.body),
-      url: comment.html_url
-    };
-  }
+  var OCTOMMENTS_USER = 'OCTOMMENTS_USER';
+  var LS = Storage();
 
-  var OCTOMMENTS_GH_TOKEN = 'OCTOMMENTS_GH_TOKEN';
-  var S = Storage();
+  function Octomments(options) {
+    if (!options) throw new Error('Octomments options required.');
+    if (!options.endpoints || !options.endpoints.issue || !options.endpoints.token) throw new Error('`options.endpoints` are missing or incomplete.');
+    if (!options.id) throw new Error('`options.id` is missing.');
+    if (!options.githubClientId) throw new Error('`options.githubClientId` is missing.');
+    var api = {};
+    var endpoints = options.endpoints,
+        id = options.id,
+        githubClientId = options.githubClientId;
 
-  function Octomments(_ref) {
-    var githubClientId = _ref.githubClientId,
-        getTokenURL = _ref.getTokenURL,
-        owner = _ref.owner,
-        repo = _ref.repo,
-        id = _ref.id,
-        _onLoggedIn = _ref.onLoggedIn,
-        _onError = _ref.onError;
-    if (!githubClientId) throw new Error('Octomments: "githubClientId" is required.');
-    if (!getTokenURL) throw new Error('Octomments: "getTokenURL" is required.');
-    if (!owner) throw new Error('Octomments: "owner" is required.');
-    if (!repo) throw new Error('Octomments: "repo" is required.');
-    if (!id) throw new Error('Octomments: "issue" is required.');
+    var notify = options.on || function () {};
 
-    _onError = _onError || function (err) {
-      return console.error(err);
+    var onCommentsError = function onCommentsError(e) {
+      return notify(Octomments.COMMENTS_ERROR, e);
     };
 
-    _onLoggedIn = _onLoggedIn || function () {};
+    var onUserError = function onUserError(e) {
+      return notify(Octomments.USER_ERROR, e);
+    };
 
-    var endpointIssues = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/issues");
-    var token = S.getItem(OCTOMMENTS_GH_TOKEN);
-
-    function getAuthenticationURL() {
-      var params = ["client_id=".concat(githubClientId), "redirect_uri=".concat(encodeURI(window.location.href))];
-      return "https://github.com/login/oauth/authorize?".concat(params.join('&'));
-    }
-
-    function getToken(code, callback) {
-      fetch("".concat(getTokenURL, "?").concat(code, "&CID=").concat(githubClientId)).then(function (r, error) {
+    function getIssue() {
+      notify(Octomments.LOADING_COMMENTS);
+      fetch("".concat(endpoints.issue, "?id=").concat(id)).then(function (response, error) {
         if (error) {
-          callback(error);
+          onCommentsError(error);
+        } else if (!response.ok) {
+          if (response.status === 404) {
+            suggestIssueCreation(id, endpoints.issue);
+            notify(Octomments.NO_GITHUB_ISSUE_CREATED);
+          } else {
+            onCommentsError(new Error("Problem getting issue's data"));
+          }
         } else {
-          return r.json();
+          response.json().then(function (data) {
+            console.log(JSON.stringify(data, null, 2));
+
+            if (data.issue.comments) {
+              notify(Octomments.COMMENTS_LOADED, data.issue.comments);
+            } else {
+              onCommentsError(new Error('Data is fetched successfully but it is in a wrong format'));
+            }
+          })["catch"](onCommentsError);
         }
-      }).then(function (result, error) {
-        if (error || result && result.error) {
-          callback(new Error(result.error));
-        } else {
-          callback(null, result);
-        }
-      })["catch"](callback);
+      })["catch"](onCommentsError);
     }
 
-    function addComment(text) {
-      fetch("".concat(endpointIssues, "/comments"), {
-        method: 'POST',
-        body: JSON.stringify({
-          body: text
-        }),
-        headers: {
-          Authorization: "token ".concat(token)
-        }
-      }).then(function (r) {
-        return r.json;
-      }).then(function (result) {
-        console.log(result);
-      })["catch"](function (error) {
-        console.error(error);
-      });
-    }
+    function getUser() {
+      notify(Octomments.LOADING_CURRENT_USER);
+      var lsUser = LS.getItem(OCTOMMENTS_USER);
+      var code = getParameterByName('code');
 
-    var api = {
-      onError: function onError(callback) {
-        _onError = callback;
-      },
-      onLoggedIn: function onLoggedIn(callback) {
-        _onLoggedIn = callback;
-      },
-      get: function get() {
-        var comments = [];
-        return new Promise(function (done, reject) {
-          fetch(endpointIssues + issue).then(function (r) {
-            return r.json();
-          }).then(function (issue) {
-            comments.push(issue);
-            return fetch(issue.comments_url).then(function (r) {
-              return r.json();
+      if (code) {
+        fetch("".concat(endpoints.token, "?code=").concat(code)).then(function (response, error) {
+          if (error || !response.ok) {
+            onUserError(getAuthenticationURL(githubClientId));
+          } else {
+            response.json().then(function (data) {
+              LS.setItem(OCTOMMENTS_USER, data);
+              notify(Octomments.USER_LOADED, JSON.stringify(data));
             });
-          }).then(function (data) {
-            comments = comments.concat(data);
-            done(comments.map(normalizeComment));
-          })["catch"](_onError);
+          }
         });
-      },
-      add: function add(text) {
-        if (!token) {
-          S.setItem(OCTOMMENTS_TEXT, text);
-          window.location.href = getAuthenticationURL();
-        } else {
-          addComment(text);
-        }
-      },
-      login: function login() {
-        window.location.href = getAuthenticationURL();
+      } else if (lsUser) {
+        console.log('validate user');
+      } else {
+        notify(Octomments.NO_CURRENT_USER, getAuthenticationURL(githubClientId));
       }
-    };
-    var code = getParameterByName('code', window.location.href);
-
-    if (code) {
-      getToken(code, function (error, t) {
-        if (error) {
-          _onError(error);
-        } else {
-          token = t;
-          S.setItem(OCTOMMENTS_GH_TOKEN, t);
-
-          _onLoggedIn(t);
-
-          _onError(error);
-        }
-      });
     }
 
+    getIssue();
+    getUser();
     return api;
   }
+
+  Octomments.LOADING_COMMENTS = 'LOADING_COMMENTS';
+  Octomments.COMMENTS_LOADED = 'COMMENTS_LOADED';
+  Octomments.NO_GITHUB_ISSUE_CREATED = 'NO_GITHUB_ISSUE_CREATED';
+  Octomments.COMMENTS_ERROR = 'COMMENTS_ERROR';
+  Octomments.USER_ERROR = 'USER_ERROR';
+  Octomments.LOADING_CURRENT_USER = 'LOADING_CURRENT_USER';
+  Octomments.NO_CURRENT_USER = 'NO_CURRENT_USER';
+  Octomments.USER_LOADED = 'USER_LOADED';
 
   return Octomments;
 
