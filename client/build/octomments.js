@@ -254,12 +254,12 @@
 
 	  if (lsTest() === true) {
 	    return localStorage;
-	  } else {
-	    return {
-	      setItem: function setItem() {},
-	      getITem: function getITem() {}
-	    };
 	  }
+
+	  return {
+	    setItem: function setItem() {},
+	    getITem: function getITem() {}
+	  };
 	}
 
 	var OCTOMMENTS_GH_TOKEN = 'OCTOMMENTS_GH_TOKEN';

@@ -1,21 +1,20 @@
 export default function Storage() {
-  function lsTest(){
-    var test = 'test';
+  function lsTest() {
+    const test = 'test';
     try {
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
       return true;
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   }
 
   if (lsTest() === true) {
     return localStorage;
-  } else {
-    return {
-      setItem(){},
-      getITem(){}
-    }
   }
+  return {
+    setItem() {},
+    getITem() {},
+  };
 }
