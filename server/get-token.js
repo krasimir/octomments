@@ -1,33 +1,12 @@
 /* eslint-disable camelcase */
 const { parse } = require('url');
-const https = require('https');
-
-const config = require('./config.json');
+const request = require('superagent');
 
 const TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
-
-function post() {
-  return new Promise((done, reject) => {
-    https
-      .request('https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY', resp => {
-        let data = '';
-
-        // A chunk of data has been recieved.
-        resp.on('data', chunk => {
-          data += chunk;
-        });
-
-        // The whole response has been received. Print out the result.
-        resp.on('end', () => {
-          console.log(JSON.parse(data).explanation);
-        });
-      })
-      .on('error', reject);
-  });
-}
+const config = require('./config.json');
 
 const getToken = async code => {
-  const response = await post(TOKEN_ENDPOINT).send({
+  const response = await request.post(TOKEN_ENDPOINT).send({
     client_id: config.github.id,
     client_secret: config.github.secret,
     code,
@@ -49,10 +28,10 @@ const getToken = async code => {
 
 module.exports = async (req, res) => {
   const { query } = parse(req.url, true);
-  const { code, CID } = query;
-
+  const { code } = query;
+  console.log('-------');
   try {
-    const token = await getToken(CID, code);
+    const token = await getToken(code);
     console.log(token);
     res.setHeader('Content-Type', 'application/json');
     res.statusCode = 200;

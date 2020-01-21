@@ -269,8 +269,8 @@
 	function getParameterByName(name, url) {
 	  if (!url) url = window.location.href;
 	  name = name.replace(/[\[\]]/g, '\\$&');
-	  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-	      results = regex.exec(url);
+	  var regex = new RegExp("[?&]".concat(name, "(=([^&#]*)|&|#|$)"));
+	  var results = regex.exec(url);
 	  if (!results) return null;
 	  if (!results[2]) return '';
 	  return decodeURIComponent(results[2].replace(/\+/g, ' '));
@@ -312,16 +312,16 @@
 
 	  _onLoggedIn = _onLoggedIn || function () {};
 
-	  var endpointIssues = 'https://api.github.com/repos/' + owner + '/' + repo + '/issues/' + issue;
+	  var endpointIssues = "https://api.github.com/repos/".concat(owner, "/").concat(repo, "/issues/").concat(issue);
 	  var token = S.getItem(OCTOMMENTS_GH_TOKEN);
 
 	  function getAuthenticationURL() {
-	    var params = ['client_id=' + githubClientId, 'redirect_uri=' + encodeURI(window.location.href)];
-	    return 'https://github.com/login/oauth/authorize?' + params.join('&');
+	    var params = ["client_id=".concat(githubClientId), "redirect_uri=".concat(encodeURI(window.location.href))];
+	    return "https://github.com/login/oauth/authorize?".concat(params.join('&'));
 	  }
 
 	  function getToken(code, callback) {
-	    fetch(getTokenURL + '?' + code + '&CID=' + githubClientId).then(function (r, error) {
+	    fetch("".concat(getTokenURL, "?").concat(code, "&CID=").concat(githubClientId)).then(function (r, error) {
 	      if (error) {
 	        callback(error);
 	      } else {
@@ -337,13 +337,13 @@
 	  }
 
 	  function addComment(text) {
-	    fetch(endpointIssues + '/comments', {
+	    fetch("".concat(endpointIssues, "/comments"), {
 	      method: 'POST',
 	      body: JSON.stringify({
 	        body: text
 	      }),
 	      headers: {
-	        'Authorization': 'token ' + token
+	        Authorization: "token ".concat(token)
 	      }
 	    }).then(function (r) {
 	      return r.json;
