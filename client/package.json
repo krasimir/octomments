@@ -4,7 +4,8 @@
   "description": "A small library that offers GitHub issues as comments for your site/blog",
   "main": "octomments.js",
   "scripts": {
-    "dev": "./node_modules/.bin/rollup -w -c",
+    "copy-to-server": "cpx \"build/octomments.js\" ../server/assets -w -v",
+    "dev": "./node_modules/.bin/concurrently \"./node_modules/.bin/rollup -w -c\" \"yarn copy-to-server\"",
     "release": "./node_modules/.bin/rollup -c && ./node_modules/.bin/uglifyjs --compress --mangle --output build/octomments.min.js -- build/octomments.js",
     "lint": "eslint ./server && eslint ./client",
     "lint:fix": "eslint ./server --fix && eslint ./client --fix"
@@ -31,6 +32,8 @@
     "@rollup/plugin-commonjs": "11.0.1",
     "@rollup/plugin-node-resolve": "7.0.0",
     "babel-eslint": "9.0.0",
+    "concurrently": "5.0.2",
+    "cpx": "1.5.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb": "17.1.1",
     "eslint-config-prettier": "4.3.0",
@@ -45,9 +48,7 @@
     "prettier": "1.19.1",
     "rollup": "1.29.0",
     "rollup-plugin-babel": "4.3.3",
-    "uglify-js": "3.7.5",
-    "rollup-plugin-copy": "3.2.1"
+    "uglify-js": "3.7.5"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
