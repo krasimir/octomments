@@ -6,6 +6,20 @@ const TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
 const USER_ENDPOINT = 'https://api.github.com/user';
 const config = require('./config.json');
 
+function error(res, error, statusCode = 500) {
+  res.setHeader('Content-Type', 'application/json');
+  res.statusCode = statusCode;
+  res.end(
+    JSON.stringify({ error: error.message })
+  );
+}
+
+function success(res, data, statusCode = 200) {
+  res.setHeader('Content-Type', 'application/json');
+  res.statusCode = statusCode
+  res.end(JSON.stringify(data));
+}
+
 const getToken = async code => {
   const response = await request.post(TOKEN_ENDPOINT).send({
     client_id: config.github.id,
@@ -43,26 +57,28 @@ const getUser = async (token) => {
   } else {
     throw new Error('Not able to make the request to third party.');
   }
-
-  
 }
 
 module.exports = async (req, res) => {
   const { query } = parse(req.url, true);
-  const { code } = query;
+  const { code, validate } = query;
+
+  if (validate) {
+    try {
+      await getUser(validate);
+      return success(res, { response: 'ok' }, 200);
+    } catch(err) {
+      console.error(err);
+      return error(res, new Error('Invalid token'), 403);
+    }
+  }
 
   try {
     const token = await getToken(code);
     const user = await getUser(token);
-    res.setHeader('Content-Type', 'application/json');
-    res.statusCode = 200;
-    res.end(JSON.stringify({ token, ...user }));
-  } catch (error) {
-    console.error(error);
-    res.setHeader('Content-Type', 'application/json');
-    res.statusCode = 403;
-    res.end(
-      JSON.stringify({ error: 'Error getting the GitHub access token.' })
-    );
+    return success(res, { token, ...user }, 200);
+  } catch (err) {
+    console.error(err);
+    return error(res, err, 403);
   }
 };

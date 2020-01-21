@@ -13,10 +13,18 @@ export function suggestIssueCreation(id, endpoint) {
   );
 }
 
+export function cleanUpURL(url) {
+  ['code', 'error', 'error_description', 'error_uri'].forEach(a => {
+    url = url.replace(new RegExp(`[\?&]${a}=[^&]+`), '');
+  });
+  return url;
+}
+
 export function getAuthenticationURL(githubClientId) {
+  const url = cleanUpURL(window.location.href);
   const params = [
     `client_id=${githubClientId}`,
-    `redirect_uri=${`${encodeURI(window.location.href)}#comments`}`,
+    `redirect_uri=${`${encodeURI(url)}`}`,
   ];
   return `https://github.com/login/oauth/authorize?${params.join('&')}`;
 }

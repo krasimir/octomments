@@ -73,6 +73,7 @@
       },
       id: 2342,
       on(type, payload, other) {
+        console.log(type);
         switch(type) {
           case Octomments.LOADING_COMMENTS:
             render('<div class="comment">Loading comments ...</div>');
@@ -98,7 +99,7 @@
             render('<div class="comment">No GitHub issue created.</div>');
           break;
           case Octomments.LOADING_CURRENT_USER:
-            
+            document.querySelector('#new-comment').innerHTML = `Loading your details ...`;
           break;
           case Octomments.NO_CURRENT_USER:
             document.querySelector('#new-comment').innerHTML = `
@@ -112,7 +113,15 @@
             `;
           break;
           case Octomments.USER_LOADED:
-            console.log(payload)
+          document.querySelector('#new-comment').innerHTML = `
+            <div>
+              ${ payload.name }
+              <img src="${ payload.avatarUrl }" />
+              <a href="javascript:comments.logout()">logout</a>
+            </div>
+            <textarea></textarea>
+            <button>comment</button>
+          `;
           break;
         }
       }

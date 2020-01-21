@@ -1,8 +1,10 @@
+/* eslint-disable no-restricted-globals */
 import Storage from './storage';
 import {
   getParameterByName,
   suggestIssueCreation,
   getAuthenticationURL,
+  cleanUpURL,
 } from './utils';
 
 const OCTOMMENTS_USER = 'OCTOMMENTS_USER';
@@ -23,6 +25,8 @@ function Octomments(options) {
   const api = {};
   const { endpoints, id, githubClientId } = options;
   const notify = options.on || (() => {});
+  const gotoComments =
+    typeof options.gotoComments !== 'undefined' ? options.gotoComments : true;
   const onCommentsError = e => notify(Octomments.COMMENTS_ERROR, e);
   const onUserError = e => notify(Octomments.USER_ERROR, e);
 
@@ -65,26 +69,52 @@ function Octomments(options) {
     const lsUser = LS.getItem(OCTOMMENTS_USER);
     const code = getParameterByName('code');
 
-    if (code) {
+    if (lsUser) {
+      try {
+        const user = JSON.parse(lsUser);
+        fetch(`${endpoints.token}?validate=${user.token}`).then(
+          (response, error) => {
+            if (error || !response.ok) {
+              LS.removeItem(OCTOMMENTS_USER);
+              onUserError(getAuthenticationURL(githubClientId));
+            } else {
+              notify(Octomments.USER_LOADED, user);
+            }
+          }
+        );
+      } catch (err) {
+        console.error(err);
+        onUserError(getAuthenticationURL(githubClientId));
+      }
+    } else if (code) {
       fetch(`${endpoints.token}?code=${code}`).then((response, error) => {
         if (error || !response.ok) {
+          history.replaceState({}, document.title, cleanUpURL(location.href));
           onUserError(getAuthenticationURL(githubClientId));
         } else {
           response.json().then(data => {
-            LS.setItem(OCTOMMENTS_USER, data);
-            notify(Octomments.USER_LOADED, JSON.stringify(data));
+            history.replaceState(
+              {},
+              document.title,
+              `${cleanUpURL(location.href)}${gotoComments ? '#comments' : ''}`
+            );
+            LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
+            notify(Octomments.USER_LOADED, data);
           });
         }
       });
-    } else if (lsUser) {
-      console.log('validate user');
     } else {
       notify(Octomments.NO_CURRENT_USER, getAuthenticationURL(githubClientId));
     }
   }
 
-  getIssue();
+  // getIssue();
   getUser();
+
+  api.logout = function() {
+    LS.removeItem(OCTOMMENTS_USER);
+    location.reload();
+  };
 
   return api;
 }
