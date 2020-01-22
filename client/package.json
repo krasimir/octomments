@@ -1,6 +1,6 @@
 {
   "name": "octomments",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A small library that offers GitHub issues as comments for your site/blog",
   "main": "octomments.js",
   "scripts": {
