@@ -1,5 +1,5 @@
 {
-  "addingNewIssueSecret": "...",
+  "password": "...",
   "github": {
     "owner": "...",
     "repo": "...",

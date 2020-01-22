@@ -25,6 +25,7 @@ export function getAuthenticationURL(githubClientId) {
   const params = [
     `client_id=${githubClientId}`,
     `redirect_uri=${`${encodeURI(url)}`}`,
+    `scope=public_repo`,
   ];
   return `https://github.com/login/oauth/authorize?${params.join('&')}`;
 }

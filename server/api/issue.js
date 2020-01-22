@@ -110,7 +110,7 @@ async function createIssue(id, title, text) {
   return rawNewIssue.data.createIssue.issue;
 }
 
-async function createComment(id, body) {
+async function createComment(id, body, token) {
   const issue = await getIssueByUserId(id);
 
   const res = await requestGraphQL(
@@ -130,7 +130,7 @@ async function createComment(id, body) {
       }
     }
   `,
-    config.github.token
+    token
   );
   if (res.errors) {
     throw new Error(res.errors.map(e => e.message).join(', '));
@@ -154,23 +154,24 @@ module.exports = async (req, res) => {
         return error(res, err, 401);
       }
       try {
-        const updatedIssue = await createComment(data.id, data.body);
+        const updatedIssue = await createComment(
+          data.id,
+          data.body,
+          data.token
+        );
         return success(res, { issue: updatedIssue }, 201);
       } catch (err) {
         return error(res, err, 500);
       }
     }
 
-    if (!data || !data.id || !data.title || !data.text || !data.secret) {
+    // fetching specific repo
+    if (!data || !data.id || !data.title || !data.text || !data.password) {
       return error(res, new Error('Missing or wrong data.'), 400);
     }
 
-    if (data.secret !== config.addingNewIssueSecret) {
-      return error(
-        res,
-        new Error('Not authorized to add new issues. Sorry.'),
-        403
-      );
+    if (data.password !== config.password) {
+      return error(res, new Error('Wrong password!'), 403);
     }
 
     try {
@@ -192,8 +193,16 @@ module.exports = async (req, res) => {
     // getting issue
   } else {
     const { query } = parse(req.url, true);
-    const { id } = query;
+    const { id, all, password } = query;
 
+    // getting all issues
+    if (all === 'true') {
+      if (password !== config.password) {
+        return error(res, new Error('Wrong password!'), 400);
+      }
+    }
+
+    // getting single issue
     if (!id) {
       error(
         res,
@@ -209,7 +218,7 @@ module.exports = async (req, res) => {
       return success(res, { issue }, issue !== null ? 200 : 404);
     } catch (err) {
       console.log(err);
-      error(res, err);
+      error(res, err, 500);
     }
   }
 };

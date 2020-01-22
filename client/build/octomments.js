@@ -47,7 +47,7 @@
   }
   function getAuthenticationURL(githubClientId) {
     var url = cleanUpURL(window.location.href);
-    var params = ["client_id=".concat(githubClientId), "redirect_uri=".concat("".concat(encodeURI(url)))];
+    var params = ["client_id=".concat(githubClientId), "redirect_uri=".concat("".concat(encodeURI(url))), "scope=public_repo"];
     return "https://github.com/login/oauth/authorize?".concat(params.join('&'));
   }
 
