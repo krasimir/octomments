@@ -27,6 +27,7 @@
     };
   }
 
+  /* eslint-disable guard-for-in */
   function getParameterByName(name, url) {
     if (!url) url = window.location.href;
     name = name.replace(/[\[\]]/g, '\\$&');
@@ -35,9 +36,6 @@
     if (!results) return null;
     if (!results[2]) return '';
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
-  }
-  function suggestIssueCreation(id, endpoint) {
-    console.log("Octomments: Here is a curl request to create the missing GitHub Issue. Make sure that you feel the empty fields:\n\ncurl --location --request POST '".concat(endpoint, "' --header 'Content-Type: application/json' --data-raw '{\"id\": \"").concat(id, "\", \"title\": \"\", \"text\": \"\", \"secret\": \"\"}'\n\n"));
   }
   function cleanUpURL(url) {
     ['code', 'error', 'error_description', 'error_uri'].forEach(function (a) {
@@ -49,12 +47,27 @@
     var url = cleanUpURL(window.location.href);
     return "".concat(tokenURL, "?redirect_url=").concat(encodeURI(url));
   }
+  function parseLinkHeader(link) {
+    var entries = link.split(',');
+    var links = {};
+
+    for (var i in entries) {
+      var entry = entries[i];
+      var l = {};
+      l.name = entry.match(/rel=\"([^\"]*)/)[1];
+      l.url = entry.match(/<([^>]*)/)[1];
+      l.page = parseInt(entry.match(/page=(\d+).*$/)[1], 10);
+      links[l.name] = l;
+    }
+
+    return links;
+  }
 
   var LOADING_COMMENTS = 'LOADING_COMMENTS';
   var COMMENTS_LOADED = 'COMMENTS_LOADED';
   var COMMENTS_ERROR = 'COMMENTS_ERROR';
   var USER_ERROR = 'USER_ERROR';
-  var LOADING_CURRENT_USER = 'LOADING_CURRENT_USER';
+  var LOADING_USER = 'LOADING_USER';
   var NO_USER = 'NO_USER';
   var USER_LOADED = 'USER_LOADED';
   var SAVING_COMMENT = 'SAVING_COMMENT';
@@ -68,7 +81,7 @@
         endpoints = _api$options.endpoints,
         gotoComments = _api$options.gotoComments;
     gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
-    api.notify(LOADING_CURRENT_USER);
+    api.notify(LOADING_USER);
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
     var code = getParameterByName('code');
 
@@ -107,36 +120,100 @@
     }
   }
 
-  function getIssue(api) {
+  function getIssueComments(api) {
+    var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
     var _api$options = api.options,
         endpoints = _api$options.endpoints,
-        id = _api$options.id;
+        id = _api$options.id,
+        github = _api$options.github;
 
     var fail = function fail(e) {
       return api.notify(COMMENTS_ERROR, e);
     };
 
+    var withServer = !!endpoints;
     api.notify(LOADING_COMMENTS);
-    fetch("".concat(endpoints.issue, "?id=").concat(id)).then(function (response, error) {
-      if (error) {
-        fail(error);
-      } else if (!response.ok) {
-        if (response.status === 404) {
-          suggestIssueCreation(id, endpoints.issue);
-          fail(new Error("GitHub issue doesn't exists"));
-        } else {
-          fail(new Error("Problem getting issue's data"));
-        }
-      } else {
-        response.json().then(function (data) {
-          if (data.issue.comments) {
-            api.notify(COMMENTS_LOADED, data.issue.comments);
+
+    function getIssueCommentsV4() {
+      fetch("".concat(endpoints.issue, "?id=").concat(id)).then(function (response, error) {
+        if (error) {
+          fail(error);
+        } else if (!response.ok) {
+          if (response.status === 404) {
+            fail(new Error("GitHub issue doesn't exists"));
           } else {
-            fail(new Error('Wrong data format'));
+            fail(new Error("Problem getting issue's data"));
           }
-        })["catch"](fail);
-      }
-    })["catch"](fail);
+        } else {
+          response.json().then(function (data) {
+            var newComments = data.issue.comments;
+            api.data = {
+              comments: api.data.comments.concat(newComments),
+              pagination: null
+            };
+            api.notify(COMMENTS_LOADED, api.data.comments, null, newComments);
+          })["catch"](fail);
+        }
+      })["catch"](fail);
+    }
+
+    function getIssueCommentsV3() {
+      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(id, "/comments?page=").concat(page);
+      fetch(url, {
+        headers: {
+          Accept: 'application/vnd.github.v3.html+json'
+        }
+      }).then(function (response, error) {
+        if (error) {
+          fail(error);
+        } else if (!response.ok) {
+          if (response.status === 404) {
+            return fail(new Error("No issue at https://github.com/".concat(github.owner, "/").concat(github.repo, "/issues with number ").concat(id)));
+          }
+
+          if (response.status === 403) {
+            if (withServer) {
+              getIssueCommentsV4();
+            } else {
+              return fail(new Error("Rate limit exceeded."));
+            }
+          }
+
+          return fail(new Error("Can't load comments."));
+        } else {
+          var link = response.headers.get('Link');
+          var pagination = null;
+
+          if (link) {
+            pagination = parseLinkHeader(link);
+          }
+
+          response.json().then(function (data) {
+            var newComments = data.map(function (item) {
+              return {
+                id: item.id,
+                url: item.html_url,
+                author: {
+                  login: item.user.login,
+                  avatarUrl: item.user.avatar_url,
+                  url: item.user.html_url
+                },
+                body: item.body_html,
+                createdAt: item.created_at,
+                updatedAt: item.updated_at
+              };
+            });
+            api.data = {
+              comments: api.data.comments.concat(newComments),
+              pagination: pagination
+            };
+            api.notify(COMMENTS_LOADED, api.data.comments, pagination, newComments);
+          })["catch"](fail);
+        }
+      });
+    }
+
+    getIssueCommentsV3();
   }
 
   function addComment(api, text) {
@@ -188,20 +265,28 @@
 
   function Octomments(options) {
     if (!options) throw new Error('Octomments options required.');
-    if (!options.endpoints || !options.endpoints.issue || !options.endpoints.token) throw new Error('`options.endpoints` are missing or incomplete.');
+    if (!options.github || !options.github.owner || !options.github.repo) throw new Error('`options.github` is missing or incomplete.');
     if (!options.id) throw new Error('`options.id` is missing.');
     var listeners = {};
     var api = {
       user: null,
+      data: {
+        comments: [],
+        pagination: null
+      },
       options: options,
-      LS: Storage()
+      LS: Storage(),
+      withAuth: !!options.withAuth
     };
-    var debug = typeof options.debug !== 'undefined' ? options.debug : false;
 
-    api.notify = function (type, payload) {
-      if (debug) console.log(type);
+    api.notify = function (type) {
+      for (var _len = arguments.length, payload = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        payload[_key - 1] = arguments[_key];
+      }
+
+      if (options.debug) console.log(type);
       if (listeners[type]) listeners[type].forEach(function (cb) {
-        return cb(payload);
+        return cb.apply(void 0, payload);
       });
     };
 
@@ -232,8 +317,15 @@
     };
 
     api.init = function () {
-      getUser(api);
-      getIssue(api);
+      if (api.withAuth) {
+        getUser(api);
+      }
+
+      getIssueComments(api);
+    };
+
+    api.page = function (index) {
+      getIssueComments(api, index);
     };
 
     return api;
@@ -243,7 +335,7 @@
   Octomments.COMMENTS_LOADED = COMMENTS_LOADED;
   Octomments.COMMENTS_ERROR = COMMENTS_ERROR;
   Octomments.USER_ERROR = USER_ERROR;
-  Octomments.LOADING_CURRENT_USER = LOADING_CURRENT_USER;
+  Octomments.LOADING_USER = LOADING_USER;
   Octomments.NO_USER = NO_USER;
   Octomments.USER_LOADED = USER_LOADED;
   Octomments.SAVING_COMMENT = SAVING_COMMENT;

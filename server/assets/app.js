@@ -1,12 +1,36 @@
+/* eslint-disable no-use-before-define */
 function $(sel) {
   return document.querySelector(sel);
 }
 function render(data) {
   $('#comments').innerHTML = data;
 }
-function renderComments(data) {
+function renderComments(all, pagination, newComments) {
+  const paginationLinks = [];
+  if (pagination) {
+    if (pagination.first) {
+      paginationLinks.push(
+        `<a href="javascript:comments.page(${pagination.first.page})">First</a>`
+      );
+    }
+    if (pagination.prev) {
+      paginationLinks.push(
+        `<a href="javascript:comments.page(${pagination.prev.page})">Previous</a>`
+      );
+    }
+    if (pagination.next) {
+      paginationLinks.push(
+        `<a href="javascript:comments.page(${pagination.next.page})">Next</a>`
+      );
+    }
+    if (pagination.last) {
+      paginationLinks.push(
+        `<a href="javascript:comments.page(${pagination.last.page})">Last</a>`
+      );
+    }
+  }
   render(
-    data
+    all
       .map(
         comment => `
             <div class="comment">
@@ -19,17 +43,26 @@ function renderComments(data) {
             </div>
           `
       )
-      .join('')
+      .join('') + paginationLinks.join('')
   );
 }
 
 const comments = Octomments({
-  endpoints: {
-    issue: 'http://localhost:3000/octomments/issue',
-    token: 'http://localhost:3000/octomments/token',
-  },
-  id: 54,
   debug: true,
+  github: {
+    owner: 'krasimir',
+    repo: 'ktcom-comments',
+  },
+  id: 6,
+  // github: {
+  //   owner: 'krasimir',
+  //   repo: 'ktcom-comments',
+  // },
+  // id: 1,
+  // endpoints: {
+  //   issue: 'http://localhost:3000/octomments/issue',
+  //   token: 'http://localhost:3000/octomments/token',
+  // },
 });
 
 comments
@@ -38,9 +71,9 @@ comments
   })
   .on(Octomments.COMMENTS_LOADED, renderComments)
   .on(Octomments.COMMENTS_ERROR, e => {
-    render(`<div class="comment">Error ${e}</div>`);
+    render(`<div class="comment">${e}</div>`);
   })
-  .on(Octomments.LOADING_CURRENT_USER, () => {
+  .on(Octomments.LOADING_USER, () => {
     $('#new-comment').innerHTML = `Loading your details ...`;
   })
   .on(Octomments.NO_USER, payload => {

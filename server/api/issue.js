@@ -1,22 +1,47 @@
+/* eslint-disable no-buffer-constructor */
 const { parse } = require('url');
-const marked = require('marked');
 const { json } = require('micro');
 const { error, success, requestGraphQL, getUser } = require('./utils');
 
 const config = require('./config.json');
+
+const ISSUE_FIELDS = (filter = 'first: 100') => `
+id
+number
+title
+bodyHTML
+comments(${filter}) {
+  nodes {
+    id
+    author {
+      login
+      url
+      avatarUrl
+    }
+    bodyHTML
+  }
+}`;
 
 function normalizeIssue(entry) {
   return {
     id: entry.id,
     number: entry.number,
     title: entry.title,
-    body: marked(entry.body),
+    body: entry.bodyHTML,
     comments:
       entry.comments && entry.comments.nodes
-        ? entry.comments.nodes.map(comment => ({
-            author: comment.author,
-            body: marked(comment.body),
-          }))
+        ? entry.comments.nodes.map(comment => {
+            const buff = Buffer.from(comment.id, 'base64');
+            const id = buff.toString('utf-8').replace(/(.*):IssueComment/, '');
+            return {
+              id,
+              url: `https://github.com/${config.github.owner}/${config.github.repo}/issues/${entry.number}#issuecomment-${id}`,
+              author: comment.author,
+              body: comment.bodyHTML,
+              createdAt: comment.createdAt,
+              updatedAt: comment.updatedAt,
+            };
+          })
         : [],
   };
 }
@@ -30,29 +55,15 @@ function normalizeRepo(graphQLResponse) {
   };
 }
 
-async function getIssueByUserId(id) {
-  const query = `repo:${config.github.owner}/${config.github.repo} in:title id#${id}`;
+async function getIssueByNumber(number, filter) {
   const res = await requestGraphQL(
     `
     {
-      search(query: "${query}", type: ISSUE, first: 1) {
-        nodes {
-          ... on Issue {
-            id
-            number
-            title
-            body
-            comments(first: 100) {
-              nodes {
-                author {
-                  login
-                  url
-                  avatarUrl
-                }
-                body
-              }
-            }
-          }
+      repository(owner: "${config.github.owner}", name: "${
+      config.github.repo
+    }") {
+        issue(number: ${number}) {
+          ${ISSUE_FIELDS(filter)}
         }
       }
     }
@@ -62,10 +73,7 @@ async function getIssueByUserId(id) {
   if (res && res.errors) {
     throw new Error(res.errors.map(e => e.message).join(', '));
   }
-  if (res.data.search.nodes.length === 0) {
-    return null;
-  }
-  return normalizeIssue(res.data.search.nodes[0]);
+  return normalizeIssue(res.data.repository.issue);
 }
 
 async function getRepo() {
@@ -87,20 +95,18 @@ async function getRepo() {
   );
 }
 
-async function createIssue(id, title, text) {
+async function createIssue(title, body) {
   const repo = await getRepo();
   const rawNewIssue = await requestGraphQL(
     `
     mutation {
       createIssue(input: {
         repositoryId: "${repo.id}"
-        title: ${JSON.stringify(`${title} / id#${id}`)}
-        body: ${JSON.stringify(text)}
+        title: ${JSON.stringify(title)}
+        body: ${JSON.stringify(body)}
       }) {
         issue {
-          number
-          title
-          body
+          ${ISSUE_FIELDS('first:1')}
         }
       }
     }
@@ -110,9 +116,8 @@ async function createIssue(id, title, text) {
   return rawNewIssue.data.createIssue.issue;
 }
 
-async function createComment(id, body, token) {
-  const issue = await getIssueByUserId(id);
-
+async function createComment(number, body, token) {
+  const issue = await getIssueByNumber(number);
   const res = await requestGraphQL(
     `
     mutation {
@@ -135,17 +140,18 @@ async function createComment(id, body, token) {
   if (res.errors) {
     throw new Error(res.errors.map(e => e.message).join(', '));
   }
-  return getIssueByUserId(id);
+  return getIssueByNumber(number, 'last:1');
 }
 
 module.exports = async (req, res) => {
-  // creating new issue
+  // ------------------------------------------------------------------------
+  // creating new issue or a comment
   if (req.method === 'POST') {
     const data = await json(req);
 
     // adding a comment
     if (data && data.comment === true) {
-      if (!data.body || !data.token || !data.id) {
+      if (!data.body || !data.token || !data.number) {
         return error(res, new Error('Missing or wrong data.'), 400);
       }
       try {
@@ -155,7 +161,7 @@ module.exports = async (req, res) => {
       }
       try {
         const updatedIssue = await createComment(
-          data.id,
+          data.number,
           data.body,
           data.token
         );
@@ -165,60 +171,39 @@ module.exports = async (req, res) => {
       }
     }
 
-    // fetching specific repo
-    if (!data || !data.id || !data.title || !data.text || !data.password) {
-      return error(res, new Error('Missing or wrong data.'), 400);
-    }
-
+    // adding new issue
     if (data.password !== config.password) {
       return error(res, new Error('Wrong password!'), 403);
     }
 
     try {
-      const alreadyExists = await getIssueByUserId(data.id);
-      if (alreadyExists !== null) {
-        return success(res, { result: 'NOOP. Already exists.' }, 200);
+      if (!data.body || !data.title) {
+        return error(res, new Error('Missing or wrong data.'), 400);
       }
-      const newIssue = await createIssue(data.id, data.title, data.text);
-      return success(
-        res,
-        { result: `New issue created (#${newIssue.number}).` },
-        201
-      );
+      const newIssue = await createIssue(data.title, data.body);
+      return success(res, { issue: newIssue }, 201);
     } catch (err) {
       console.log(err);
       return error(res, new Error(`Error getting issue with id="${data.id}".`));
     }
+  }
 
-    // getting issue
-  } else {
-    const { query } = parse(req.url, true);
-    const { id, all, password } = query;
+  // ------------------------------------------------------------------------
+  // getting issue
+  const { query } = parse(req.url, true);
+  const { number } = query;
 
-    // getting all issues
-    if (all === 'true') {
-      if (password !== config.password) {
-        return error(res, new Error('Wrong password!'), 400);
-      }
-    }
+  // getting single issue
+  if (!number) {
+    return error(res, new Error(`Missing "number".`), 400);
+  }
 
-    // getting single issue
-    if (!id) {
-      error(
-        res,
-        new Error(`No "id" provided. Please pass "id" as a GET parameter.`),
-        400
-      );
-      return;
-    }
+  try {
+    const issue = await getIssueByNumber(number);
 
-    try {
-      const issue = await getIssueByUserId(id);
-
-      return success(res, { issue }, issue !== null ? 200 : 404);
-    } catch (err) {
-      console.log(err);
-      error(res, err, 500);
-    }
+    return success(res, { issue }, issue !== null ? 200 : 404);
+  } catch (err) {
+    console.log(err);
+    return error(res, err, 500);
   }
 };

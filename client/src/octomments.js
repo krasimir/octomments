@@ -1,14 +1,14 @@
 /* eslint-disable no-restricted-globals */
 import Storage from './storage';
 import getUser from './ops/getUser';
-import getIssue from './ops/getIssue';
+import getIssueComments from './ops/getIssueComments';
 import addComment from './ops/addComment';
 import {
   LOADING_COMMENTS,
   COMMENTS_LOADED,
   COMMENTS_ERROR,
   USER_ERROR,
-  LOADING_CURRENT_USER,
+  LOADING_USER,
   NO_USER,
   USER_LOADED,
   SAVING_COMMENT,
@@ -19,21 +19,22 @@ import {
 
 function Octomments(options) {
   if (!options) throw new Error('Octomments options required.');
-  if (
-    !options.endpoints ||
-    !options.endpoints.issue ||
-    !options.endpoints.token
-  )
-    throw new Error('`options.endpoints` are missing or incomplete.');
+  if (!options.github || !options.github.owner || !options.github.repo)
+    throw new Error('`options.github` is missing or incomplete.');
   if (!options.id) throw new Error('`options.id` is missing.');
 
   const listeners = {};
-  const api = { user: null, options, LS: Storage() };
-  const debug = typeof options.debug !== 'undefined' ? options.debug : false;
+  const api = {
+    user: null,
+    data: { comments: [], pagination: null },
+    options,
+    LS: Storage(),
+    withAuth: !!options.withAuth,
+  };
 
-  api.notify = function(type, payload) {
-    if (debug) console.log(type);
-    if (listeners[type]) listeners[type].forEach(cb => cb(payload));
+  api.notify = function(type, ...payload) {
+    if (options.debug) console.log(type);
+    if (listeners[type]) listeners[type].forEach(cb => cb(...payload));
   };
   api.logout = function(refresh = true) {
     api.user = null;
@@ -56,8 +57,13 @@ function Octomments(options) {
     return this;
   };
   api.init = function() {
-    getUser(api);
-    getIssue(api);
+    if (api.withAuth) {
+      getUser(api);
+    }
+    getIssueComments(api);
+  };
+  api.page = function(index) {
+    getIssueComments(api, index);
   };
 
   return api;
@@ -67,7 +73,7 @@ Octomments.LOADING_COMMENTS = LOADING_COMMENTS;
 Octomments.COMMENTS_LOADED = COMMENTS_LOADED;
 Octomments.COMMENTS_ERROR = COMMENTS_ERROR;
 Octomments.USER_ERROR = USER_ERROR;
-Octomments.LOADING_CURRENT_USER = LOADING_CURRENT_USER;
+Octomments.LOADING_USER = LOADING_USER;
 Octomments.NO_USER = NO_USER;
 Octomments.USER_LOADED = USER_LOADED;
 Octomments.SAVING_COMMENT = SAVING_COMMENT;

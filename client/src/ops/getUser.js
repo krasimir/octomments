@@ -2,7 +2,7 @@
 import { getParameterByName, getAuthenticationURL, cleanUpURL } from '../utils';
 import {
   USER_ERROR,
-  LOADING_CURRENT_USER,
+  LOADING_USER,
   NO_USER,
   USER_LOADED,
   OCTOMMENTS_USER,
@@ -13,7 +13,7 @@ export default function getUser(api) {
 
   gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
 
-  api.notify(LOADING_CURRENT_USER);
+  api.notify(LOADING_USER);
   const lsUser = api.LS.getItem(OCTOMMENTS_USER);
   const code = getParameterByName('code');
   const fail = err =>
