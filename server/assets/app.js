@@ -24,12 +24,12 @@ function renderComments(data) {
 }
 
 const comments = Octomments({
-  githubClientId: '06615e67c519e3f6df59',
   endpoints: {
     issue: 'http://localhost:3000/octomments/issue',
     token: 'http://localhost:3000/octomments/token',
   },
   id: 54,
+  debug: true,
 });
 
 comments
@@ -37,15 +37,8 @@ comments
     render('<div class="comment">Loading comments ...</div>');
   })
   .on(Octomments.COMMENTS_LOADED, renderComments)
-  .on(Octomments.COMMENT_SAVED, data => {
-    $('button').disabled = false;
-    renderComments(data);
-  })
   .on(Octomments.COMMENTS_ERROR, e => {
     render(`<div class="comment">Error ${e}</div>`);
-  })
-  .on(Octomments.NO_GITHUB_ISSUE_CREATED, () => {
-    render('<div class="comment">No GitHub issue created.</div>');
   })
   .on(Octomments.LOADING_CURRENT_USER, () => {
     $('#new-comment').innerHTML = `Loading your details ...`;
@@ -83,7 +76,11 @@ comments
   .on(Octomments.SAVING_COMMENT, () => {
     $('button').disabled = true;
   })
-  .on(Octomments.NEW_COMMENT_ERROR, e => {
+  .on(Octomments.COMMENT_SAVED, data => {
+    $('button').disabled = false;
+    renderComments(data);
+  })
+  .on(Octomments.COMMENT_ERROR, e => {
     $('#new-comment-error').innerHTML = e;
   })
   .init();

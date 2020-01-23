@@ -28,8 +28,22 @@ const getToken = async code => {
 
 module.exports = async (req, res) => {
   const { query } = parse(req.url, true);
-  const { code } = query;
+  const { code, redirect_url } = query;
 
+  // login
+  if (!code) {
+    const params = [
+      `client_id=${config.github.id}`,
+      `redirect_uri=${`${redirect_url}`}`,
+      `scope=public_repo`,
+    ];
+    res.writeHead(301, {
+      Location: `https://github.com/login/oauth/authorize?${params.join('&')}`,
+    });
+    return res.end();
+  }
+
+  // getting the token out of code param
   try {
     const token = await getToken(code);
     const user = await getUser(token);

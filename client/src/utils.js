@@ -20,12 +20,7 @@ export function cleanUpURL(url) {
   return url;
 }
 
-export function getAuthenticationURL(githubClientId) {
+export function getAuthenticationURL(tokenURL) {
   const url = cleanUpURL(window.location.href);
-  const params = [
-    `client_id=${githubClientId}`,
-    `redirect_uri=${`${encodeURI(url)}`}`,
-    `scope=public_repo`,
-  ];
-  return `https://github.com/login/oauth/authorize?${params.join('&')}`;
+  return `${tokenURL}?redirect_url=${encodeURI(url)}`;
 }

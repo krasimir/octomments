@@ -45,146 +45,171 @@
     });
     return url;
   }
-  function getAuthenticationURL(githubClientId) {
+  function getAuthenticationURL(tokenURL) {
     var url = cleanUpURL(window.location.href);
-    var params = ["client_id=".concat(githubClientId), "redirect_uri=".concat("".concat(encodeURI(url))), "scope=public_repo"];
-    return "https://github.com/login/oauth/authorize?".concat(params.join('&'));
+    return "".concat(tokenURL, "?redirect_url=").concat(encodeURI(url));
+  }
+
+  var LOADING_COMMENTS = 'LOADING_COMMENTS';
+  var COMMENTS_LOADED = 'COMMENTS_LOADED';
+  var COMMENTS_ERROR = 'COMMENTS_ERROR';
+  var USER_ERROR = 'USER_ERROR';
+  var LOADING_CURRENT_USER = 'LOADING_CURRENT_USER';
+  var NO_USER = 'NO_USER';
+  var USER_LOADED = 'USER_LOADED';
+  var SAVING_COMMENT = 'SAVING_COMMENT';
+  var COMMENT_SAVED = 'COMMENT_SAVED';
+  var COMMENT_ERROR = 'COMMENT_ERROR';
+  var OCTOMMENTS_USER = 'OCTOMMENTS_USER';
+
+  /* eslint-disable no-restricted-globals */
+  function getUser(api) {
+    var _api$options = api.options,
+        endpoints = _api$options.endpoints,
+        gotoComments = _api$options.gotoComments;
+    gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
+    api.notify(LOADING_CURRENT_USER);
+    var lsUser = api.LS.getItem(OCTOMMENTS_USER);
+    var code = getParameterByName('code');
+
+    var fail = function fail(err) {
+      return api.notify(USER_ERROR, err, getAuthenticationURL(endpoints.token));
+    };
+
+    var clearCurrentURL = function clearCurrentURL() {
+      return history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#comments' : ''));
+    };
+
+    if (lsUser) {
+      try {
+        api.user = JSON.parse(lsUser);
+        api.notify(USER_LOADED, api.user);
+      } catch (err) {
+        console.error(err);
+        fail(err);
+      }
+    } else if (code) {
+      fetch("".concat(endpoints.token, "?code=").concat(code)).then(function (response, error) {
+        if (error || !response.ok) {
+          clearCurrentURL();
+          fail(new Error("Can't get a token"));
+        } else {
+          response.json().then(function (data) {
+            clearCurrentURL();
+            api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
+            api.notify(USER_LOADED, data);
+            api.user = data;
+          })["catch"](fail);
+        }
+      })["catch"](fail);
+    } else {
+      api.notify(NO_USER, getAuthenticationURL(endpoints.token));
+    }
+  }
+
+  function getIssue(api) {
+    var _api$options = api.options,
+        endpoints = _api$options.endpoints,
+        id = _api$options.id;
+
+    var fail = function fail(e) {
+      return api.notify(COMMENTS_ERROR, e);
+    };
+
+    api.notify(LOADING_COMMENTS);
+    fetch("".concat(endpoints.issue, "?id=").concat(id)).then(function (response, error) {
+      if (error) {
+        fail(error);
+      } else if (!response.ok) {
+        if (response.status === 404) {
+          suggestIssueCreation(id, endpoints.issue);
+          fail(new Error("GitHub issue doesn't exists"));
+        } else {
+          fail(new Error("Problem getting issue's data"));
+        }
+      } else {
+        response.json().then(function (data) {
+          if (data.issue.comments) {
+            api.notify(COMMENTS_LOADED, data.issue.comments);
+          } else {
+            fail(new Error('Wrong data format'));
+          }
+        })["catch"](fail);
+      }
+    })["catch"](fail);
+  }
+
+  function addComment(api, text) {
+    var fail = function fail(e) {
+      return api.notify(COMMENT_ERROR, e);
+    };
+
+    var _api$options = api.options,
+        endpoints = _api$options.endpoints,
+        id = _api$options.id;
+    api.notify(SAVING_COMMENT);
+    fetch("".concat(endpoints.issue), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        comment: true,
+        body: text,
+        token: api.user.token,
+        id: id
+      })
+    }).then(function (response, error) {
+      if (error) {
+        return fail(error);
+      }
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          api.logout(false);
+          api.notify(NO_USER);
+          return fail(new Error('Not authorized. Log in again.'));
+        }
+
+        return fail(new Error('Adding a new comment failed.'));
+      }
+
+      response.json().then(function (data) {
+        if (data.issue.comments) {
+          api.notify(COMMENT_SAVED, data.issue.comments);
+        } else {
+          fail(new Error('Wrong data format'));
+        }
+      })["catch"](fail);
+    })["catch"](fail);
   }
 
   /* eslint-disable no-restricted-globals */
-  var OCTOMMENTS_USER = 'OCTOMMENTS_USER';
-  var LS = Storage();
 
   function Octomments(options) {
     if (!options) throw new Error('Octomments options required.');
     if (!options.endpoints || !options.endpoints.issue || !options.endpoints.token) throw new Error('`options.endpoints` are missing or incomplete.');
     if (!options.id) throw new Error('`options.id` is missing.');
-    if (!options.githubClientId) throw new Error('`options.githubClientId` is missing.');
     var listeners = {};
     var api = {
-      user: null
+      user: null,
+      options: options,
+      LS: Storage()
     };
-    var endpoints = options.endpoints,
-        id = options.id,
-        githubClientId = options.githubClientId;
-    var gotoComments = typeof options.gotoComments !== 'undefined' ? options.gotoComments : true;
+    var debug = typeof options.debug !== 'undefined' ? options.debug : false;
 
-    var notify = function notify(type, payload) {
-      console.log(type);
+    api.notify = function (type, payload) {
+      if (debug) console.log(type);
       if (listeners[type]) listeners[type].forEach(function (cb) {
         return cb(payload);
       });
     };
 
-    var onError = function onError(type) {
-      return function (e, other) {
-        return notify(type, e);
-      };
-    };
-
-    function getUser() {
-      notify(Octomments.LOADING_CURRENT_USER);
-      var lsUser = LS.getItem(OCTOMMENTS_USER);
-      var code = getParameterByName('code');
-
-      var fail = function fail(err) {
-        return onError(Octomments.USER_ERROR)(err, getAuthenticationURL(githubClientId));
-      };
-
-      if (lsUser) {
-        try {
-          api.user = JSON.parse(lsUser);
-          notify(Octomments.USER_LOADED, api.user);
-        } catch (err) {
-          console.error(err);
-          fail(err);
-        }
-      } else if (code) {
-        fetch("".concat(endpoints.token, "?code=").concat(code)).then(function (response, error) {
-          if (error || !response.ok) {
-            history.replaceState({}, document.title, cleanUpURL(location.href));
-            fail(new Error("Can't get a token"));
-          } else {
-            response.json().then(function (data) {
-              history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#comments' : ''));
-              LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
-              notify(Octomments.USER_LOADED, data);
-              api.user = data;
-            });
-          }
-        })["catch"](fail);
-      } else {
-        notify(Octomments.NO_USER, getAuthenticationURL(githubClientId));
-      }
-    }
-
-    function extractComments(response, event) {
-      var fail = onError(Octomments.COMMENTS_ERROR);
-      response.json().then(function (data) {
-        if (data.issue.comments) {
-          notify(event, data.issue.comments);
-        } else {
-          fail(new Error('Data is fetched successfully but it is in a wrong format'));
-        }
-      })["catch"](fail);
-    }
-
-    function getIssue() {
-      var fail = onError(Octomments.COMMENTS_ERROR);
-      notify(Octomments.LOADING_COMMENTS);
-      fetch("".concat(endpoints.issue, "?id=").concat(id)).then(function (response, error) {
-        if (error) {
-          fail(error);
-        } else if (!response.ok) {
-          if (response.status === 404) {
-            suggestIssueCreation(id, endpoints.issue);
-            notify(Octomments.NO_GITHUB_ISSUE_CREATED);
-          } else {
-            fail(new Error("Problem getting issue's data"));
-          }
-        } else {
-          extractComments(response, Octomments.COMMENTS_LOADED);
-        }
-      })["catch"](fail);
-    }
-
-    function addComment(text) {
-      var fail = onError(Octomments.NEW_COMMENT_ERROR);
-      fetch("".concat(endpoints.issue), {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          comment: true,
-          body: text,
-          token: api.user.token,
-          id: id
-        })
-      }).then(function (response, error) {
-        if (error) {
-          return fail(error);
-        }
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            api.user = null;
-            LS.removeItem(OCTOMMENTS_USER);
-            notify(Octomments.NO_USER);
-            return fail(new Error('Not authorized. Log in again.'));
-          }
-
-          return fail(new Error('Adding a new comment failed.'));
-        }
-
-        extractComments(response, Octomments.COMMENT_SAVED);
-      })["catch"](fail);
-    }
-
     api.logout = function () {
+      var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
       api.user = null;
-      LS.removeItem(OCTOMMENTS_USER);
-      location.reload();
+      api.LS.removeItem(OCTOMMENTS_USER);
+      if (refresh) location.reload();
     };
 
     api.add = function (text) {
@@ -192,8 +217,7 @@
         throw new Error('No user logged in.');
       }
 
-      notify(Octomments.SAVING_COMMENT);
-      addComment(text);
+      addComment(api, text);
     };
 
     api.off = function (type) {
@@ -208,24 +232,23 @@
     };
 
     api.init = function () {
-      getUser();
-      getIssue();
+      getUser(api);
+      getIssue(api);
     };
 
     return api;
   }
 
-  Octomments.LOADING_COMMENTS = 'LOADING_COMMENTS';
-  Octomments.COMMENTS_LOADED = 'COMMENTS_LOADED';
-  Octomments.NO_GITHUB_ISSUE_CREATED = 'NO_GITHUB_ISSUE_CREATED';
-  Octomments.COMMENTS_ERROR = 'COMMENTS_ERROR';
-  Octomments.USER_ERROR = 'USER_ERROR';
-  Octomments.LOADING_CURRENT_USER = 'LOADING_CURRENT_USER';
-  Octomments.NO_USER = 'NO_USER';
-  Octomments.USER_LOADED = 'USER_LOADED';
-  Octomments.SAVING_COMMENT = 'SAVING_COMMENT';
-  Octomments.COMMENT_SAVED = 'COMMENT_SAVED';
-  Octomments.NEW_COMMENT_ERROR = 'NEW_COMMENT_ERROR';
+  Octomments.LOADING_COMMENTS = LOADING_COMMENTS;
+  Octomments.COMMENTS_LOADED = COMMENTS_LOADED;
+  Octomments.COMMENTS_ERROR = COMMENTS_ERROR;
+  Octomments.USER_ERROR = USER_ERROR;
+  Octomments.LOADING_CURRENT_USER = LOADING_CURRENT_USER;
+  Octomments.NO_USER = NO_USER;
+  Octomments.USER_LOADED = USER_LOADED;
+  Octomments.SAVING_COMMENT = SAVING_COMMENT;
+  Octomments.COMMENT_SAVED = COMMENT_SAVED;
+  Octomments.NEW_COMMENT_ERROR = COMMENT_ERROR;
 
   return Octomments;
 
