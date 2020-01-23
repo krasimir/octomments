@@ -5,7 +5,8 @@
   "description": "",
   "main": "octomments.js",
   "scripts": {
-    "dev": "now dev"
+    "dev": "now dev",
+    "release": "now --prod"
   },
   "author": "Krasimir Tsonev",
   "license": "MIT",
