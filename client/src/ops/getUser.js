@@ -1,5 +1,10 @@
 /* eslint-disable no-restricted-globals */
-import { getParameterByName, getAuthenticationURL, cleanUpURL } from '../utils';
+import {
+  getParameterByName,
+  getAuthenticationURL,
+  cleanUpURL,
+  getNewCommentURL,
+} from '../utils';
 import {
   USER_ERROR,
   LOADING_USER,
@@ -9,15 +14,16 @@ import {
 } from '../constants';
 
 export default function getUser(api) {
-  let { endpoints, gotoComments } = api.options;
+  let { endpoints, gotoComments, github, id } = api.options;
 
   gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
 
   api.notify(LOADING_USER);
+  const authURL = endpoints ? getAuthenticationURL(endpoints.token) : null;
+  const newCommentURL = github ? getNewCommentURL(id, github) : null;
   const lsUser = api.LS.getItem(OCTOMMENTS_USER);
   const code = getParameterByName('code');
-  const fail = err =>
-    api.notify(USER_ERROR, err, getAuthenticationURL(endpoints.token));
+  const fail = err => api.notify(USER_ERROR, err, authURL, newCommentURL);
   const clearCurrentURL = () =>
     history.replaceState(
       {},
@@ -33,7 +39,7 @@ export default function getUser(api) {
       console.error(err);
       fail(err);
     }
-  } else if (code) {
+  } else if (code && endpoints) {
     fetch(`${endpoints.token}?code=${code}`)
       .then((response, error) => {
         if (error || !response.ok) {
@@ -53,6 +59,6 @@ export default function getUser(api) {
       })
       .catch(fail);
   } else {
-    api.notify(NO_USER, getAuthenticationURL(endpoints.token));
+    api.notify(NO_USER, authURL, newCommentURL);
   }
 }

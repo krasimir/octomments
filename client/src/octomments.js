@@ -29,7 +29,6 @@ function Octomments(options) {
     data: { comments: [], pagination: null },
     options,
     LS: Storage(),
-    withAuth: !!options.withAuth,
   };
 
   api.notify = function(type, ...payload) {
@@ -57,14 +56,28 @@ function Octomments(options) {
     return this;
   };
   api.init = function() {
-    if (api.withAuth) {
-      getUser(api);
-    }
+    getUser(api);
     getIssueComments(api);
   };
   api.page = function(index) {
     getIssueComments(api, index);
   };
+
+  api.LOADING_COMMENTS = LOADING_COMMENTS;
+  api.COMMENTS_LOADED = COMMENTS_LOADED;
+  api.COMMENTS_ERROR = COMMENTS_ERROR;
+  api.USER_ERROR = USER_ERROR;
+  api.LOADING_USER = LOADING_USER;
+  api.NO_USER = NO_USER;
+  api.USER_LOADED = USER_LOADED;
+  api.SAVING_COMMENT = SAVING_COMMENT;
+  api.COMMENT_SAVED = COMMENT_SAVED;
+  api.NEW_COMMENT_ERROR = COMMENT_ERROR;
+
+  if (options.renderer) {
+    const [r, ...otherArgs] = options.renderer;
+    r(api, ...otherArgs);
+  }
 
   return api;
 }

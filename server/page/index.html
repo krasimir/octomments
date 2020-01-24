@@ -2,64 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>Octomments</title>
+  <link href="/assets/octomments-renderer.css" rel="stylesheet">
   <style>
     body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
+      font-size: 18px;
+      font-family: Arial, Helvetica, sans-serif;
     }
     .container {
+      max-width: 600px;
+      margin: 0 auto;
       padding: 2em;
-    }
-    img {
-      width: 40px;
-    }
-    .comment {
-      margin: 0 0 1em 0;
-      padding: 1em;
-      border: solid 1px #b0b0b0;
-      border-radius: 6px;
-    }
-    .comment img {
-      width: 20px;
-      float: left;
-    }
-    .comment span {
-      line-height: 0;
-      font-size: 1.2em;
-      display: inline-block;
-      margin: 0 0 0 1em;
-    }
-    .comment hr {
-      border-top: none;
-      border-bottom: solid 1px #999;
-      margin: .5em 0;
-    }
-    .comments {
-      margin: 0 0 2em 0;
-    }
-    textarea {
-      width: 300px;
-      height: 200px;
-      display: block;
-      margin: 0 0 1em 0;
-    }
-    button {
-      padding: 1em;
-      font-size: 1em;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div id="comments"></div>
-    <div id="new-comment"></div>
-  </div>
+  <div class="container"></div>
   <script src="/assets/octomments.js"></script>
-  <script src="/assets/app.js"></script>
+  <script src="/assets/octomments-renderer.js"></script>
+  <script>
+    Octomments({
+      debug: false,
+      github: {
+        owner: 'krasimir',
+        repo: 'octomments',
+      },
+      id: 1,
+      renderer: [OctommentsRenderer, '.container'],
+      // endpoints: {
+      //   issue: 'http://localhost:3000/octomments/issue',
+      //   token: 'http://localhost:3000/octomments/token',
+      // },
+    }).init();
+  </script>
 </body>
 </html>

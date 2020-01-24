@@ -4,6 +4,38 @@
   (global = global || self, global.Octomments = factory());
 }(this, (function () { 'use strict';
 
+  function _toArray(arr) {
+    return _arrayWithHoles(arr) || _iterableToArray(arr) || _nonIterableRest();
+  }
+
+  function _toConsumableArray(arr) {
+    return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread();
+  }
+
+  function _arrayWithoutHoles(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+
+      return arr2;
+    }
+  }
+
+  function _arrayWithHoles(arr) {
+    if (Array.isArray(arr)) return arr;
+  }
+
+  function _iterableToArray(iter) {
+    if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter);
+  }
+
+  function _nonIterableSpread() {
+    throw new TypeError("Invalid attempt to spread non-iterable instance");
+  }
+
+  function _nonIterableRest() {
+    throw new TypeError("Invalid attempt to destructure non-iterable instance");
+  }
+
   function Storage() {
     function lsTest() {
       var test = 'test';
@@ -47,6 +79,9 @@
     var url = cleanUpURL(window.location.href);
     return "".concat(tokenURL, "?redirect_url=").concat(encodeURI(url));
   }
+  function getNewCommentURL(id, github) {
+    return "https://github.com/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(id, "#new_comment_field");
+  }
   function parseLinkHeader(link) {
     var entries = link.split(',');
     var links = {};
@@ -79,14 +114,18 @@
   function getUser(api) {
     var _api$options = api.options,
         endpoints = _api$options.endpoints,
-        gotoComments = _api$options.gotoComments;
+        gotoComments = _api$options.gotoComments,
+        github = _api$options.github,
+        id = _api$options.id;
     gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
     api.notify(LOADING_USER);
+    var authURL = endpoints ? getAuthenticationURL(endpoints.token) : null;
+    var newCommentURL = github ? getNewCommentURL(id, github) : null;
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
     var code = getParameterByName('code');
 
     var fail = function fail(err) {
-      return api.notify(USER_ERROR, err, getAuthenticationURL(endpoints.token));
+      return api.notify(USER_ERROR, err, authURL, newCommentURL);
     };
 
     var clearCurrentURL = function clearCurrentURL() {
@@ -101,7 +140,7 @@
         console.error(err);
         fail(err);
       }
-    } else if (code) {
+    } else if (code && endpoints) {
       fetch("".concat(endpoints.token, "?code=").concat(code)).then(function (response, error) {
         if (error || !response.ok) {
           clearCurrentURL();
@@ -116,12 +155,11 @@
         }
       })["catch"](fail);
     } else {
-      api.notify(NO_USER, getAuthenticationURL(endpoints.token));
+      api.notify(NO_USER, authURL, newCommentURL);
     }
   }
 
   function getIssueComments(api) {
-    var page = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
     var _api$options = api.options,
         endpoints = _api$options.endpoints,
         id = _api$options.id,
@@ -151,14 +189,15 @@
               comments: api.data.comments.concat(newComments),
               pagination: null
             };
-            api.notify(COMMENTS_LOADED, api.data.comments, null, newComments);
+            api.notify(COMMENTS_LOADED, newComments, null);
           })["catch"](fail);
         }
       })["catch"](fail);
     }
 
     function getIssueCommentsV3() {
-      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(id, "/comments?page=").concat(page);
+      // const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${id}/comments?page=${page}`;
+      var url = "http://localhost:3000/assets/mock.v3.comments.json";
       fetch(url, {
         headers: {
           Accept: 'application/vnd.github.v3.html+json'
@@ -207,7 +246,7 @@
               comments: api.data.comments.concat(newComments),
               pagination: pagination
             };
-            api.notify(COMMENTS_LOADED, api.data.comments, pagination, newComments);
+            api.notify(COMMENTS_LOADED, newComments, pagination);
           })["catch"](fail);
         }
       });
@@ -261,8 +300,6 @@
     })["catch"](fail);
   }
 
-  /* eslint-disable no-restricted-globals */
-
   function Octomments(options) {
     if (!options) throw new Error('Octomments options required.');
     if (!options.github || !options.github.owner || !options.github.repo) throw new Error('`options.github` is missing or incomplete.');
@@ -275,8 +312,7 @@
         pagination: null
       },
       options: options,
-      LS: Storage(),
-      withAuth: !!options.withAuth
+      LS: Storage()
     };
 
     api.notify = function (type) {
@@ -317,16 +353,32 @@
     };
 
     api.init = function () {
-      if (api.withAuth) {
-        getUser(api);
-      }
-
+      getUser(api);
       getIssueComments(api);
     };
 
     api.page = function (index) {
-      getIssueComments(api, index);
+      getIssueComments(api);
     };
+
+    api.LOADING_COMMENTS = LOADING_COMMENTS;
+    api.COMMENTS_LOADED = COMMENTS_LOADED;
+    api.COMMENTS_ERROR = COMMENTS_ERROR;
+    api.USER_ERROR = USER_ERROR;
+    api.LOADING_USER = LOADING_USER;
+    api.NO_USER = NO_USER;
+    api.USER_LOADED = USER_LOADED;
+    api.SAVING_COMMENT = SAVING_COMMENT;
+    api.COMMENT_SAVED = COMMENT_SAVED;
+    api.NEW_COMMENT_ERROR = COMMENT_ERROR;
+
+    if (options.renderer) {
+      var _options$renderer = _toArray(options.renderer),
+          r = _options$renderer[0],
+          otherArgs = _options$renderer.slice(1);
+
+      r.apply(void 0, [api].concat(_toConsumableArray(otherArgs)));
+    }
 
     return api;
   }

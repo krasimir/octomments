@@ -5,7 +5,7 @@ import {
 } from '../constants';
 import { parseLinkHeader } from '../utils';
 
-export default function getIssueComments(api, page = 1) {
+export default function getIssueComments(api) {
   const { endpoints, id, github } = api.options;
   const fail = e => api.notify(COMMENTS_ERROR, e);
   const withServer = !!endpoints;
@@ -32,7 +32,7 @@ export default function getIssueComments(api, page = 1) {
                 comments: api.data.comments.concat(newComments),
                 pagination: null,
               };
-              api.notify(COMMENTS_LOADED, api.data.comments, null, newComments);
+              api.notify(COMMENTS_LOADED, newComments, null);
             })
             .catch(fail);
         }
@@ -40,8 +40,9 @@ export default function getIssueComments(api, page = 1) {
       .catch(fail);
   }
 
-  function getIssueCommentsV3() {
-    const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${id}/comments?page=${page}`;
+  function getIssueCommentsV3(page = 1) {
+    // const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${id}/comments?page=${page}`;
+    const url = `http://localhost:3000/assets/mock.v3.comments.json`;
     fetch(url, {
       headers: { Accept: 'application/vnd.github.v3.html+json' },
     }).then((response, error) => {
@@ -88,12 +89,7 @@ export default function getIssueComments(api, page = 1) {
               comments: api.data.comments.concat(newComments),
               pagination,
             };
-            api.notify(
-              COMMENTS_LOADED,
-              api.data.comments,
-              pagination,
-              newComments
-            );
+            api.notify(COMMENTS_LOADED, newComments, pagination);
           })
           .catch(fail);
       }

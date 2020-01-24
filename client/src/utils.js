@@ -21,6 +21,10 @@ export function getAuthenticationURL(tokenURL) {
   return `${tokenURL}?redirect_url=${encodeURI(url)}`;
 }
 
+export function getNewCommentURL(id, github) {
+  return `https://github.com/${github.owner}/${github.repo}/issues/${id}#new_comment_field`;
+}
+
 export function parseLinkHeader(link) {
   const entries = link.split(',');
   const links = {};
