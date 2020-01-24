@@ -19,6 +19,8 @@ comments(${filter}) {
       avatarUrl
     }
     bodyHTML
+    updatedAt
+    createdAt
   }
 }`;
 
@@ -128,7 +130,7 @@ async function createComment(number, body, token) {
         commentEdge {
           node {
             id
-            publishedAt
+            updatedAt
             createdAt
           }
         }

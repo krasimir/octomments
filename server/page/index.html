@@ -27,17 +27,17 @@
   <script src="/assets/octomments-renderer.js"></script>
   <script>
     Octomments({
-      debug: false,
+      debug: true,
       github: {
         owner: 'krasimir',
         repo: 'octomments',
       },
-      id: 1,
+      number: 1,
       renderer: [OctommentsRenderer, '.container'],
-      // endpoints: {
-      //   issue: 'http://localhost:3000/octomments/issue',
-      //   token: 'http://localhost:3000/octomments/token',
-      // },
+      endpoints: {
+        issue: 'http://localhost:3000/octomments/issue',
+        token: 'http://localhost:3000/octomments/token',
+      },
     }).init();
   </script>
 </body>

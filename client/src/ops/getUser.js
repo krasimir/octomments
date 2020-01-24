@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-globals */
+/* eslint-disable no-restricted-globals, no-nested-ternary */
 import {
   getParameterByName,
   getAuthenticationURL,
@@ -6,24 +6,25 @@ import {
   getNewCommentURL,
 } from '../utils';
 import {
-  USER_ERROR,
-  LOADING_USER,
-  NO_USER,
+  USER_LOADING,
+  USER_NONE,
   USER_LOADED,
   OCTOMMENTS_USER,
 } from '../constants';
 
 export default function getUser(api) {
-  let { endpoints, gotoComments, github, id } = api.options;
+  const { notify, options, error } = api;
+  let { endpoints, gotoComments, github, number } = options;
 
   gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
+  notify(USER_LOADING);
 
-  api.notify(LOADING_USER);
-  const authURL = endpoints ? getAuthenticationURL(endpoints.token) : null;
-  const newCommentURL = github ? getNewCommentURL(id, github) : null;
+  const newCommentURL = endpoints
+    ? getAuthenticationURL(endpoints.token)
+    : github
+    ? getNewCommentURL(number, github)
+    : null;
   const lsUser = api.LS.getItem(OCTOMMENTS_USER);
-  const code = getParameterByName('code');
-  const fail = err => api.notify(USER_ERROR, err, authURL, newCommentURL);
   const clearCurrentURL = () =>
     history.replaceState(
       {},
@@ -34,31 +35,38 @@ export default function getUser(api) {
   if (lsUser) {
     try {
       api.user = JSON.parse(lsUser);
-      api.notify(USER_LOADED, api.user);
+      notify(USER_LOADED, api.user);
     } catch (err) {
       console.error(err);
-      fail(err);
+      error(new Error('Corrupted data in local storage.'));
     }
-  } else if (code && endpoints) {
-    fetch(`${endpoints.token}?code=${code}`)
-      .then((response, error) => {
-        if (error || !response.ok) {
+  } else if (endpoints && getParameterByName('code')) {
+    fetch(`${endpoints.token}?code=${getParameterByName('code')}`)
+      .then((response, err) => {
+        if (err || !response.ok) {
+          if (err) console.error(err);
           clearCurrentURL();
-          fail(new Error(`Can't get a token`));
+          error(new Error('Problem getting access token.'));
         } else {
           response
             .json()
             .then(data => {
               clearCurrentURL();
               api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
-              api.notify(USER_LOADED, data);
+              notify(USER_LOADED, data);
               api.user = data;
             })
-            .catch(fail);
+            .catch(err => {
+              console.error(err);
+              error(new Error('Problem parsing access token response.'));
+            });
         }
       })
-      .catch(fail);
+      .catch(err => {
+        console.error(err);
+        error(new Error('Problem getting access token.'));
+      });
   } else {
-    api.notify(NO_USER, authURL, newCommentURL);
+    notify(USER_NONE, newCommentURL);
   }
 }

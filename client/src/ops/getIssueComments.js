@@ -1,27 +1,27 @@
-import {
-  COMMENTS_ERROR,
-  LOADING_COMMENTS,
-  COMMENTS_LOADED,
-} from '../constants';
+import { COMMENTS_LOADING, COMMENTS_LOADED } from '../constants';
 import { parseLinkHeader } from '../utils';
 
 export default function getIssueComments(api) {
-  const { endpoints, id, github } = api.options;
-  const fail = e => api.notify(COMMENTS_ERROR, e);
+  const { notify, options, error } = api;
+  const { endpoints, number } = options;
   const withServer = !!endpoints;
+  const commentsError = new Error(
+    `Error getting comments for issue #${number}.`
+  );
+  const doesntExist = new Error(`Issue #${number} doesn't exists.`);
 
-  api.notify(LOADING_COMMENTS);
+  notify(COMMENTS_LOADING);
 
   function getIssueCommentsV4() {
-    fetch(`${endpoints.issue}?id=${id}`)
-      .then((response, error) => {
-        if (error) {
-          fail(error);
+    fetch(`${endpoints.issue}?number=${number}`)
+      .then((response, err) => {
+        if (err) {
+          error(commentsError);
         } else if (!response.ok) {
           if (response.status === 404) {
-            fail(new Error(`GitHub issue doesn't exists`));
+            error(doesntExist);
           } else {
-            fail(new Error(`Problem getting issue's data`));
+            error(commentsError);
           }
         } else {
           response
@@ -32,38 +32,40 @@ export default function getIssueComments(api) {
                 comments: api.data.comments.concat(newComments),
                 pagination: null,
               };
-              api.notify(COMMENTS_LOADED, newComments, null);
+              notify(COMMENTS_LOADED, newComments, null);
             })
-            .catch(fail);
+            .catch(err => {
+              console.err(err);
+              error(new Error(`Error parsing the API response`));
+            });
         }
       })
-      .catch(fail);
+      .catch(err => {
+        console.err(err);
+        error(commentsError);
+      });
   }
 
   function getIssueCommentsV3(page = 1) {
-    // const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${id}/comments?page=${page}`;
-    const url = `http://localhost:3000/assets/mock.v3.comments.json`;
+    // const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments?page=${page}`;
+    const url = `http://localhost:3000/assets/mock.v3.commentsa.json`;
     fetch(url, {
       headers: { Accept: 'application/vnd.github.v3.html+json' },
-    }).then((response, error) => {
-      if (error) {
-        fail(error);
+    }).then((response, err) => {
+      if (err) {
+        error(commentsError);
       } else if (!response.ok) {
         if (response.status === 404) {
-          return fail(
-            new Error(
-              `No issue at https://github.com/${github.owner}/${github.repo}/issues with number ${id}`
-            )
-          );
+          return error(doesntExist);
         }
         if (response.status === 403) {
           if (withServer) {
             getIssueCommentsV4();
           } else {
-            return fail(new Error(`Rate limit exceeded.`));
+            return error(new Error(`Rate limit exceeded.`));
           }
         }
-        return fail(new Error(`Can't load comments.`));
+        return error(commentsError);
       } else {
         const link = response.headers.get('Link');
         let pagination = null;
@@ -89,9 +91,12 @@ export default function getIssueComments(api) {
               comments: api.data.comments.concat(newComments),
               pagination,
             };
-            api.notify(COMMENTS_LOADED, newComments, pagination);
+            notify(COMMENTS_LOADED, newComments, pagination);
           })
-          .catch(fail);
+          .catch(err => {
+            console.err(err);
+            error(commentsError);
+          });
       }
     });
   }

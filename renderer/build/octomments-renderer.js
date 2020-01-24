@@ -44,37 +44,41 @@
     }
 
     var $root = createEl('div', 'root', $container);
-    var $comments = createEl('div', 'comments', $root);
-    var $newComment = createEl('div', 'new-comment', $root);
-    var $loadingComments;
-    var $loadingUser;
+    var $commentsContainer = createEl('div', 'comments', $root);
+    var $newCommentContainer = createEl('div', 'new-comment', $root);
+    var $errorContainer = createEl('div', 'error-container', $root);
+    var $comments;
+    var $user;
+    var $error;
 
     function renderComments(comments, pagination) {
-      if ($loadingComments) {
-        remove($loadingComments);
-        $loadingComments = null;
+      if ($comments) {
+        remove($comments);
       }
 
-      if (comments.length === 0) {
-        createEl('p', 'no-comments', $comments, 'No comments yet. Be the first to comment.');
-      } else {
-        comments.forEach(function (comment) {
-          createEl('div', 'comment', $comments, "\n            <div class=\"".concat(PREFIX, "comment_left\">\n              <img src=\"").concat(comment.author.avatarUrl, "\" />\n            </div>\n            <div class=\"").concat(PREFIX, "comment_right\">\n              <div class=\"").concat(PREFIX, "comment_heading\">\n                <strong>").concat(comment.author.login, "</strong>\n                <small> ~ ").concat(formatDate(comment.updatedAt), "</small>\n                <a href=\"").concat(comment.url, "\" target=\"_blank\" class=\"").concat(PREFIX, "right\">").concat(GITHUB(16), "</a>\n              </div>\n              <div class=\"").concat(PREFIX, "comment_body\">\n                ").concat(comment.body, "\n              </div>\n            </div>\n        "));
-        });
+      if (comments === null) {
+        $comments = createEl('small', 'loading', $commentsContainer, 'Loading comments ...');
+        return;
       }
+
+      comments.forEach(function (comment) {
+        createEl('div', 'comment', $commentsContainer, "\n          <div class=\"".concat(PREFIX, "comment_left\">\n            <img src=\"").concat(comment.author.avatarUrl, "\" />\n          </div>\n          <div class=\"").concat(PREFIX, "comment_right\">\n            <div class=\"").concat(PREFIX, "comment_heading\">\n              <strong>").concat(comment.author.login, "</strong>\n              <small> ~ ").concat(formatDate(comment.updatedAt), "</small>\n              <a href=\"").concat(comment.url, "\" target=\"_blank\" class=\"").concat(PREFIX, "right\">").concat(GITHUB(16), "</a>\n            </div>\n            <div class=\"").concat(PREFIX, "comment_body\">\n              ").concat(comment.body, "\n            </div>\n          </div>\n        "));
+      });
     }
 
-    function renderError(str, parent) {
-      return createEl('div', 'error', parent, str);
-    }
+    function renderUser() {
+      var user = octomments.user;
 
-    function renderUser(user) {
-      if ($loadingUser) {
-        remove($loadingUser);
-        $loadingUser = null;
+      if ($user) {
+        remove($user);
       }
 
-      createEl('div', 'comment', $newComment, "\n        <div class=\"".concat(PREFIX, "comment_left\">\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n        </div>\n    "));
+      if (!user) {
+        $user = createEl('small', 'loading', $newCommentContainer, 'Loading user ...');
+        return;
+      }
+
+      $user = createEl('div', 'comment', $newCommentContainer, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n          <a href=\"javascript:void(0);\" id=\"").concat(PREFIX, "logout\" class=\"").concat(PREFIX, "right ").concat(PREFIX, "logout\"><small>Log out</small></a>\n        </div>\n    "));
       $("#".concat(PREFIX, "_submit_comment")).addEventListener('click', function () {
         var text = $("#".concat(PREFIX, "_textarea")).value;
 
@@ -82,59 +86,45 @@
           octomments.add(text);
         }
       });
+      $("#".concat(PREFIX, "logout")).addEventListener('click', function () {
+        octomments.logout();
+      });
+    }
+
+    function renderNoUser(url) {
+      if ($user) {
+        remove($user);
+      }
+
+      $user = createEl('div', 'loading', $newCommentContainer, "<a href=\"".concat(url, "\" class=\"as-button\">\u270D\uFE0F Post a comment</a>"));
+    }
+
+    function renderError(e) {
+      if ($error) {
+        remove($error);
+      }
+
+      $error = createEl('div', 'error', $errorContainer, e.message);
     }
 
     octomments // comments
-    .on(octomments.LOADING_COMMENTS, function () {
-      $loadingComments = createEl('small', 'loading', $comments, 'Loading comments ...');
-    }).on(octomments.COMMENTS_LOADED, renderComments).on(octomments.COMMENTS_ERROR, function () {
-      if ($loadingComments) {
-        remove($loadingComments);
-        $loadingComments = null;
-      }
-
-      renderError('There is a problem loading the comments. Please wait a bit and reload the page.', $comments);
-    }) // user
-    .on(octomments.LOADING_USER, function () {
-      $loadingUser = createEl('small', 'loading', $newComment, 'Loading user ...');
-    }).on(octomments.USER_LOADED, renderUser).on(octomments.SAVING_COMMENT, function () {
+    .on(octomments.COMMENTS_LOADING, function () {
+      return renderComments(null);
+    }).on(octomments.COMMENTS_LOADED, renderComments) // user
+    .on(octomments.USER_LOADING, function () {
+      return renderUser();
+    }).on(octomments.USER_NONE, renderNoUser).on(octomments.USER_LOADED, renderUser) // commenting
+    .on(octomments.COMMENT_SAVING, function () {
+      $("#".concat(PREFIX, "new_comment")).style.opacity = 0.4;
       var button = $("#".concat(PREFIX, "_submit_comment"));
       var textarea = $("#".concat(PREFIX, "_textarea"));
       button.disabled = true;
       textarea.disabled = true;
       button.innerHTML = 'Posting your comment ...';
-    });
-    /*
-    octomments
-      .on(octomments.LOADING_USER, () => {
-        $('#new-comment').innerHTML = `Loading your details ...`;
-      })
-      .on(octomments.NO_USER, (authURL, githubURL) => {
-        $('#new-comment').innerHTML = `
-      <a href="${authURL || githubURL}" ${
-          authURL ? '' : 'target="_blank"'
-        }>Post new comment</a>
-      <div id="new-comment-error"></div>
-    `;
-      })
-      .on(octomments.USER_ERROR, (e, authURL) => {
-        $('#new-comment').innerHTML = `
-      ${e}<br />
-      <a href="${authURL}">Log in (via GitHub)</a>
-    `;
-      })
-      .on(octomments.SAVING_COMMENT, () => {
-        $('button').disabled = true;
-      })
-      .on(octomments.COMMENT_SAVED, data => {
-        $('button').disabled = false;
-        renderComments(data);
-      })
-      .on(octomments.COMMENT_ERROR, e => {
-        $('#new-comment-error').innerHTML = e;
-      })
-      .init();
-    */
+    }).on(octomments.COMMENT_SAVED, function (newComments) {
+      renderUser();
+      renderComments(newComments);
+    }).on(octomments.ERROR, renderError);
   }
 
   return OctommentsRenderer;

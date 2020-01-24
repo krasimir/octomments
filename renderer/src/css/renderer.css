@@ -114,7 +114,7 @@
   margin-right: 0.4em;
 }
 .O_no-comments::before {
-  content: "✍️";
+  content: "🗒️";
   display: inline-block;
   margin-right: 0.4em;
 }
@@ -127,17 +127,18 @@
 }
 .O_new-comment textarea {
   width: 100%;
-  height: 5em;
+  height: 7em;
   display: block;
   margin-bottom: 1em;
   outline: none;
   border: solid 1px #c4c4c4;
   border-radius: 4px;
-  padding: 0.7em;
+  padding: 1em;
   font-size: 0.8em;
   opacity: 0.8;
+  box-sizing: border-box;
 }
-.O_new-comment button {
+.O_new-comment button, .as-button {
   border: solid 2px #c4c4c4;
   border-radius: 4px;
   padding: 0.6em 1em;
@@ -146,10 +147,20 @@
   cursor: pointer;
   outline: none;
   background: #f7f7f7;
+  text-decoration: none;;
 }
-.O_new-comment button:hover {
+.O_new-comment button:hover, .as-button:hover {
   background: #c4c4c4;
 }
-.O_new-comment button:active {
+.O_new-comment button:active, .as-button:active {
   transform: translateY(2px);
+}
+.O_logout {
+  opacity: 0.3;
+}
+.O_logout:hover {
+  opacity: 1;
+}
+.O_error-container {
+  margin-top: 1em;
 }

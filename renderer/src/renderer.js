@@ -26,69 +26,77 @@ function OctommentsRenderer(octomments, containerSelector) {
     throw new Error('Octomments: invalid container selector.');
   }
   const $root = createEl('div', 'root', $container);
-  const $comments = createEl('div', 'comments', $root);
-  const $newComment = createEl('div', 'new-comment', $root);
-  let $loadingComments;
-  let $loadingUser;
+  const $commentsContainer = createEl('div', 'comments', $root);
+  const $newCommentContainer = createEl('div', 'new-comment', $root);
+  const $errorContainer = createEl('div', 'error-container', $root);
+  let $comments;
+  let $user;
+  let $error;
 
   function renderComments(comments, pagination) {
-    if ($loadingComments) {
-      remove($loadingComments);
-      $loadingComments = null;
+    if ($comments) {
+      remove($comments);
     }
-    if (comments.length === 0) {
-      createEl(
-        'p',
-        'no-comments',
-        $comments,
-        'No comments yet. Be the first to comment.'
+    if (comments === null) {
+      $comments = createEl(
+        'small',
+        'loading',
+        $commentsContainer,
+        'Loading comments ...'
       );
-    } else {
-      comments.forEach(comment => {
-        createEl(
-          'div',
-          'comment',
-          $comments,
-          `
-            <div class="${PREFIX}comment_left">
-              <img src="${comment.author.avatarUrl}" />
-            </div>
-            <div class="${PREFIX}comment_right">
-              <div class="${PREFIX}comment_heading">
-                <strong>${comment.author.login}</strong>
-                <small> ~ ${formatDate(comment.updatedAt)}</small>
-                <a href="${
-                  comment.url
-                }" target="_blank" class="${PREFIX}right">${GITHUB(16)}</a>
-              </div>
-              <div class="${PREFIX}comment_body">
-                ${comment.body}
-              </div>
-            </div>
+      return;
+    }
+    comments.forEach(comment => {
+      createEl(
+        'div',
+        'comment',
+        $commentsContainer,
         `
-        );
-      });
-    }
+          <div class="${PREFIX}comment_left">
+            <img src="${comment.author.avatarUrl}" />
+          </div>
+          <div class="${PREFIX}comment_right">
+            <div class="${PREFIX}comment_heading">
+              <strong>${comment.author.login}</strong>
+              <small> ~ ${formatDate(comment.updatedAt)}</small>
+              <a href="${
+                comment.url
+              }" target="_blank" class="${PREFIX}right">${GITHUB(16)}</a>
+            </div>
+            <div class="${PREFIX}comment_body">
+              ${comment.body}
+            </div>
+          </div>
+        `
+      );
+    });
   }
-  function renderError(str, parent) {
-    return createEl('div', 'error', parent, str);
-  }
-  function renderUser(user) {
-    if ($loadingUser) {
-      remove($loadingUser);
-      $loadingUser = null;
+  function renderUser() {
+    const user = octomments.user;
+    if ($user) {
+      remove($user);
     }
-    createEl(
+    if (!user) {
+      $user = createEl(
+        'small',
+        'loading',
+        $newCommentContainer,
+        'Loading user ...'
+      );
+      return;
+    }
+    $user = createEl(
       'div',
       'comment',
-      $newComment,
+      $newCommentContainer,
       `
-        <div class="${PREFIX}comment_left">
+        <div class="${PREFIX}comment_left" id="${PREFIX}new_comment">
           <img src="${user.avatarUrl}" />
         </div>
         <div class="${PREFIX}comment_right">
-          <textarea id="${PREFIX}_textarea"></textarea>
+          <textarea id="${PREFIX}_textarea" placeholder="I think ..."></textarea>
           <button id="${PREFIX}_submit_comment">Comment</button>
+          <a href="javascript:void(0);" id="${PREFIX}logout" class="${PREFIX}right ${PREFIX}logout"><small>Log out</small></a>
         </div>
     `
     );
@@ -98,78 +106,50 @@ function OctommentsRenderer(octomments, containerSelector) {
         octomments.add(text);
       }
     });
+    $(`#${PREFIX}logout`).addEventListener('click', () => {
+      octomments.logout();
+    });
+  }
+  function renderNoUser(url) {
+    if ($user) {
+      remove($user);
+    }
+    $user = createEl(
+      'div',
+      'loading',
+      $newCommentContainer,
+      `<a href="${url}" class="as-button">✍️ Post a comment</a>`
+    );
+  }
+  function renderError(e) {
+    if ($error) {
+      remove($error);
+    }
+    $error = createEl('div', 'error', $errorContainer, e.message);
   }
 
   octomments
     // comments
-    .on(octomments.LOADING_COMMENTS, () => {
-      $loadingComments = createEl(
-        'small',
-        'loading',
-        $comments,
-        'Loading comments ...'
-      );
-    })
+    .on(octomments.COMMENTS_LOADING, () => renderComments(null))
     .on(octomments.COMMENTS_LOADED, renderComments)
-    .on(octomments.COMMENTS_ERROR, () => {
-      if ($loadingComments) {
-        remove($loadingComments);
-        $loadingComments = null;
-      }
-      renderError(
-        'There is a problem loading the comments. Please wait a bit and reload the page.',
-        $comments
-      );
-    })
     // user
-    .on(octomments.LOADING_USER, () => {
-      $loadingUser = createEl(
-        'small',
-        'loading',
-        $newComment,
-        'Loading user ...'
-      );
-    })
+    .on(octomments.USER_LOADING, () => renderUser(null))
+    .on(octomments.USER_NONE, renderNoUser)
     .on(octomments.USER_LOADED, renderUser)
-    .on(octomments.SAVING_COMMENT, () => {
+    // commenting
+    .on(octomments.COMMENT_SAVING, () => {
+      $(`#${PREFIX}new_comment`).style.opacity = 0.4;
       const button = $(`#${PREFIX}_submit_comment`);
       const textarea = $(`#${PREFIX}_textarea`);
       button.disabled = true;
       textarea.disabled = true;
       button.innerHTML = 'Posting your comment ...';
-    });
-
-  /*
-  octomments
-    .on(octomments.LOADING_USER, () => {
-      $('#new-comment').innerHTML = `Loading your details ...`;
     })
-    .on(octomments.NO_USER, (authURL, githubURL) => {
-      $('#new-comment').innerHTML = `
-    <a href="${authURL || githubURL}" ${
-        authURL ? '' : 'target="_blank"'
-      }>Post new comment</a>
-    <div id="new-comment-error"></div>
-  `;
+    .on(octomments.COMMENT_SAVED, newComments => {
+      renderUser();
+      renderComments(newComments);
     })
-    .on(octomments.USER_ERROR, (e, authURL) => {
-      $('#new-comment').innerHTML = `
-    ${e}<br />
-    <a href="${authURL}">Log in (via GitHub)</a>
-  `;
-    })
-    .on(octomments.SAVING_COMMENT, () => {
-      $('button').disabled = true;
-    })
-    .on(octomments.COMMENT_SAVED, data => {
-      $('button').disabled = false;
-      renderComments(data);
-    })
-    .on(octomments.COMMENT_ERROR, e => {
-      $('#new-comment-error').innerHTML = e;
-    })
-    .init();
-  */
+    .on(octomments.ERROR, renderError);
 }
 
 export default OctommentsRenderer;

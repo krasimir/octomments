@@ -1,15 +1,12 @@
-import {
-  SAVING_COMMENT,
-  COMMENT_ERROR,
-  NO_USER,
-  COMMENT_SAVED,
-} from '../constants';
+import { COMMENT_SAVING, USER_NONE, COMMENT_SAVED } from '../constants';
 
 export default function addComment(api, text) {
-  const fail = e => api.notify(COMMENT_ERROR, e);
-  const { endpoints, id } = api.options;
+  const { notify, error, options } = api;
+  const { endpoints, number } = options;
+  const failed = new Error('Adding a new comment failed.');
 
-  api.notify(SAVING_COMMENT);
+  notify(COMMENT_SAVING);
+
   fetch(`${endpoints.issue}`, {
     method: 'POST',
     headers: {
@@ -19,31 +16,37 @@ export default function addComment(api, text) {
       comment: true,
       body: text,
       token: api.user.token,
-      id,
+      number,
     }),
   })
-    .then((response, error) => {
-      if (error) {
-        return fail(error);
+    .then((response, err) => {
+      if (err) {
+        return error(failed);
       }
       if (!response.ok) {
         if (response.status === 401) {
           api.logout(false);
-          api.notify(NO_USER);
-          return fail(new Error('Not authorized. Log in again.'));
+          notify(USER_NONE);
+          return error(new Error('Not authorized. Log in again.'));
         }
-        return fail(new Error('Adding a new comment failed.'));
+        return error(failed);
       }
       response
         .json()
         .then(data => {
           if (data.issue.comments) {
-            api.notify(COMMENT_SAVED, data.issue.comments);
+            notify(COMMENT_SAVED, data.issue.comments);
           } else {
-            fail(new Error('Wrong data format'));
+            error(new Error('Parsing new-comment response failed.'));
           }
         })
-        .catch(fail);
+        .catch(err => {
+          console.error(err);
+          error(failed);
+        });
     })
-    .catch(fail);
+    .catch(err => {
+      console.error(err);
+      error(failed);
+    });
 }

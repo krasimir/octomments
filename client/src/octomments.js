@@ -3,25 +3,13 @@ import Storage from './storage';
 import getUser from './ops/getUser';
 import getIssueComments from './ops/getIssueComments';
 import addComment from './ops/addComment';
-import {
-  LOADING_COMMENTS,
-  COMMENTS_LOADED,
-  COMMENTS_ERROR,
-  USER_ERROR,
-  LOADING_USER,
-  NO_USER,
-  USER_LOADED,
-  SAVING_COMMENT,
-  COMMENT_SAVED,
-  COMMENT_ERROR,
-  OCTOMMENTS_USER,
-} from './constants';
+import { CONSTANTS, OCTOMMENTS_USER, ERROR } from './constants';
 
 function Octomments(options) {
   if (!options) throw new Error('Octomments options required.');
   if (!options.github || !options.github.owner || !options.github.repo)
     throw new Error('`options.github` is missing or incomplete.');
-  if (!options.id) throw new Error('`options.id` is missing.');
+  if (!options.number) throw new Error('`options.number` is missing.');
 
   const listeners = {};
   const api = {
@@ -62,17 +50,11 @@ function Octomments(options) {
   api.page = function(index) {
     getIssueComments(api, index);
   };
+  api.error = e => {
+    api.notify(ERROR, e);
+  };
 
-  api.LOADING_COMMENTS = LOADING_COMMENTS;
-  api.COMMENTS_LOADED = COMMENTS_LOADED;
-  api.COMMENTS_ERROR = COMMENTS_ERROR;
-  api.USER_ERROR = USER_ERROR;
-  api.LOADING_USER = LOADING_USER;
-  api.NO_USER = NO_USER;
-  api.USER_LOADED = USER_LOADED;
-  api.SAVING_COMMENT = SAVING_COMMENT;
-  api.COMMENT_SAVED = COMMENT_SAVED;
-  api.NEW_COMMENT_ERROR = COMMENT_ERROR;
+  CONSTANTS.forEach(c => (api[c] = c));
 
   if (options.renderer) {
     const [r, ...otherArgs] = options.renderer;
@@ -82,15 +64,5 @@ function Octomments(options) {
   return api;
 }
 
-Octomments.LOADING_COMMENTS = LOADING_COMMENTS;
-Octomments.COMMENTS_LOADED = COMMENTS_LOADED;
-Octomments.COMMENTS_ERROR = COMMENTS_ERROR;
-Octomments.USER_ERROR = USER_ERROR;
-Octomments.LOADING_USER = LOADING_USER;
-Octomments.NO_USER = NO_USER;
-Octomments.USER_LOADED = USER_LOADED;
-Octomments.SAVING_COMMENT = SAVING_COMMENT;
-Octomments.COMMENT_SAVED = COMMENT_SAVED;
-Octomments.NEW_COMMENT_ERROR = COMMENT_ERROR;
-
+CONSTANTS.forEach(c => (Octomments[c] = c));
 export default Octomments;
