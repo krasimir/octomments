@@ -1,1 +1,1 @@
-# Octomments client
+# Octomments renderer
