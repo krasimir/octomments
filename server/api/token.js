@@ -1,10 +1,12 @@
-/* eslint-disable camelcase */
+/* eslint-disable camelcase, import/no-dynamic-require  */
 const { parse } = require('url');
 const request = require('superagent');
 const { error, success, getUser } = require('./utils');
 
 const TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
-const config = require('./config.json');
+const config = require(process.env.NODE_ENV === 'development'
+  ? './config.local.json'
+  : './config.json');
 
 const getToken = async code => {
   const response = await request.post(TOKEN_ENDPOINT).send({

@@ -1,9 +1,11 @@
-/* eslint-disable no-buffer-constructor */
+/* eslint-disable no-buffer-constructor, import/no-dynamic-require */
 const { parse } = require('url');
 const { json } = require('micro');
 const { error, success, requestGraphQL, getUser } = require('./utils');
 
-const config = require('./config.json');
+const config = require(process.env.NODE_ENV === 'development'
+  ? './config.local.json'
+  : './config.json');
 
 const ISSUE_FIELDS = (filter = 'first: 100') => `
 id

@@ -1,4 +1,4 @@
-![Riew logo](./assets/logo.jpg)
+<div align="center"><img src="./assets/logo.jpg" /></div>
 
 <h1 align="center">Octomments</h1>
 

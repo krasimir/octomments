@@ -15,14 +15,51 @@
       font-family: Arial, Helvetica, sans-serif;
     }
     .container {
-      max-width: 600px;
+      max-width: 1200px;
       margin: 0 auto;
-      padding: 2em;
+      padding: 0;
+    }
+    @media all and (max-width: 1200px) {
+      .container {
+        padding: 0 2em;
+      }
+    }
+    header img {
+      display: block;
+      width: 100%;
+      margin: 0 auto;
+    }
+    h1 {
+      margin: 0 0 1em 0;
+      padding: 0;
+      text-align: center;
+    }
+    h2 {
+      font-size: 1.3em;
+      font-weight: normal;
+      text-align: center;
+      margin: 0 0 4em 0;
+      padding: 0;
+    }
+    section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 1em;
     }
   </style>
 </head>
 <body>
-  <div class="container"></div>
+  <div class="container">
+    <header>
+      <img src="/assets/logo.jpg" alt="Octomments"/>
+      <h1>Octomments</h1>
+      <h2>Using GitHub issues as a comment plugin for your web site.</h2>
+    </header>
+    <section>
+      <div>a</div>
+      <div id="comments"></div>
+    </section>    
+  </div>
   <script src="/assets/octomments.js"></script>
   <script src="/assets/octomments-renderer.js"></script>
   <script>
@@ -33,7 +70,7 @@
         repo: 'octomments',
       },
       number: 1,
-      renderer: [OctommentsRenderer, '.container'],
+      renderer: [OctommentsRenderer, '#comments'],
       endpoints: {
         issue: '/octomments/issue',
         token: '/octomments/token',
