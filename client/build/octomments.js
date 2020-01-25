@@ -109,18 +109,16 @@
   var OCTOMMENTS_USER = 'OCTOMMENTS_USER';
   var CONSTANTS = [ERROR, COMMENTS_LOADING, COMMENTS_LOADED, COMMENT_SAVING, USER_LOADING, USER_NONE, USER_LOADED, COMMENT_SAVED];
 
-  /* eslint-disable no-restricted-globals, no-nested-ternary */
+  /* eslint-disable no-restricted-globals */
   function getUser(api) {
     var notify = api.notify,
         options = api.options,
         error = api.error;
     var endpoints = options.endpoints,
-        gotoComments = options.gotoComments,
-        github = options.github,
-        number = options.number;
+        gotoComments = options.gotoComments;
     gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
     notify(USER_LOADING);
-    var newCommentURL = endpoints ? getAuthenticationURL(endpoints.token) : github ? getNewCommentURL(number, github) : null;
+    var newCommentURL = api.generateNewCommentURL();
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
 
     var clearCurrentURL = function clearCurrentURL() {
@@ -145,8 +143,8 @@
           response.json().then(function (data) {
             clearCurrentURL();
             api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
-            notify(USER_LOADED, data);
             api.user = data;
+            notify(USER_LOADED, data);
           })["catch"](function (err) {
             console.error(err);
             error(new Error('Problem parsing access token response.'), 7);
@@ -166,7 +164,8 @@
         options = api.options,
         error = api.error;
     var endpoints = options.endpoints,
-        number = options.number;
+        number = options.number,
+        github = options.github;
     var withServer = !!endpoints;
     var commentsError = new Error("Error getting comments for issue #".concat(number, "."));
     var doesntExist = new Error("Issue #".concat(number, " doesn't exists."));
@@ -202,8 +201,10 @@
     }
 
     function getIssueCommentsV3() {
-      // const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments?page=${page}`;
-      var url = "http://localhost:3000/assets/mock.v3.commentsa.json";
+      var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page); // const url = `http://localhost:3000/assets/mock.v3.comments.json`;
+      // const url = `http://localhost:3000/assets/mock.v3.no-comments.json`;
+
       fetch(url, {
         headers: {
           Accept: 'application/vnd.github.v3.html+json'
@@ -327,6 +328,10 @@
       },
       options: options,
       LS: Storage()
+    }; // internal
+
+    api.error = function (e, meta) {
+      api.notify(ERROR, e, meta);
     };
 
     api.notify = function (type) {
@@ -334,11 +339,20 @@
         payload[_key - 1] = arguments[_key];
       }
 
-      if (options.debug) console.log(type);
+      if (options.debug) console.log(type, payload);
       if (listeners[type]) listeners[type].forEach(function (cb) {
         return cb.apply(void 0, payload);
       });
     };
+
+    api.initUser = function () {
+      return getUser(api);
+    };
+
+    api.initComments = function () {
+      return getIssueComments(api);
+    }; // public
+
 
     api.logout = function () {
       var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
@@ -367,16 +381,16 @@
     };
 
     api.init = function () {
-      getUser(api);
-      getIssueComments(api);
+      api.initUser();
+      api.initComments();
     };
 
     api.page = function (index) {
       getIssueComments(api);
     };
 
-    api.error = function (e, meta) {
-      api.notify(ERROR, e, meta);
+    api.generateNewCommentURL = function () {
+      return options.endpoints ? getAuthenticationURL(options.endpoints.token) : options.github ? getNewCommentURL(options.number, options.github) : null;
     };
 
     CONSTANTS.forEach(function (c) {

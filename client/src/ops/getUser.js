@@ -1,10 +1,5 @@
-/* eslint-disable no-restricted-globals, no-nested-ternary */
-import {
-  getParameterByName,
-  getAuthenticationURL,
-  cleanUpURL,
-  getNewCommentURL,
-} from '../utils';
+/* eslint-disable no-restricted-globals */
+import { getParameterByName, cleanUpURL } from '../utils';
 import {
   USER_LOADING,
   USER_NONE,
@@ -14,16 +9,12 @@ import {
 
 export default function getUser(api) {
   const { notify, options, error } = api;
-  let { endpoints, gotoComments, github, number } = options;
+  let { endpoints, gotoComments } = options;
 
   gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
   notify(USER_LOADING);
 
-  const newCommentURL = endpoints
-    ? getAuthenticationURL(endpoints.token)
-    : github
-    ? getNewCommentURL(number, github)
-    : null;
+  const newCommentURL = api.generateNewCommentURL();
   const lsUser = api.LS.getItem(OCTOMMENTS_USER);
   const clearCurrentURL = () =>
     history.replaceState(
@@ -53,8 +44,8 @@ export default function getUser(api) {
             .then(data => {
               clearCurrentURL();
               api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
-              notify(USER_LOADED, data);
               api.user = data;
+              notify(USER_LOADED, data);
             })
             .catch(err => {
               console.error(err);

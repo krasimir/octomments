@@ -10,7 +10,7 @@
     return "<svg width=\"".concat(size, "\" height=\"").concat(size, "\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"feather feather-github\"><path d=\"M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22\"></path></svg>");
   };
 
-  function $$1(sel) {
+  function $(sel) {
     return document.querySelector(sel);
   }
   function createEl() {
@@ -33,8 +33,17 @@
     var d = new Date(str);
     return "".concat(d.getDate(), ".").concat(d.getMonth() + 1, ".").concat(d.getFullYear());
   }
+  function onClick(sel, callback) {
+    var el = $(sel);
 
-  function Comments($container) {
+    if (el) {
+      el.addEventListener('click', callback);
+    } else {
+      console.warn("Octomments: ".concat(sel, " element doesn't exists in the DOM"));
+    }
+  }
+
+  function Comments($container, octomments) {
     var api = {};
     var state = 'idle';
 
@@ -60,32 +69,23 @@
       });
     };
 
-    return api;
-  }
-
-  /*
-  1 - comments: issue doesn't exists
-  2 - comments: other problem loading the issue
-  3 - comments: issue request succeed but can't parse the json response
-  4 - comments: hit the V3 rate limit
-  5 - user: corrupted data in local storage
-  6 - user: can't get the access token
-  7 - user: problem parsing the access token response
-  8 - new comment: adding new comment failed
-  9 - new comment: not authorized
-  10 - new comment: request succeed but can't parse the json response
-  */
-
-  function OError($container) {
-    var api = {};
-
-    api.data = function (e, type) {
-      console.log("Octomments error ".concat(type));
-      console.error(e);
+    function showError(str) {
       empty($container);
-      createEl('div', 'error', $container, e.message);
-    };
+      createEl('div', 'error', $container, "<div>".concat(str, "</div>"));
+    }
 
+    octomments.on(octomments.ERROR, function (e, type) {
+      var _octomments$options = octomments.options,
+          number = _octomments$options.number,
+          github = _octomments$options.github;
+
+      if (type === 1) {
+        showError("Issue <strong>#".concat(number, "</strong> doesn't exists at <a href=\"https://github.com/").concat(github.owner, "/").concat(github.repo, "/issues\" target=\"_blank\">").concat(github.repo, " repo</a>."));
+      } else if (type === 2 || type === 3 || type === 4) {
+        showError("There is a problem fetching the comments. Wait a bit and click <a href=\"javascript:void(0);\" id=\"".concat(PREFIX, "comments_try_again\">here</a> to try again."));
+        onClick("#".concat(PREFIX, "comments_try_again"), octomments.initComments);
+      }
+    });
     return api;
   }
 
@@ -111,46 +111,70 @@
 
       empty($container);
       createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n          <a href=\"javascript:void(0);\" id=\"").concat(PREFIX, "logout\" class=\"").concat(PREFIX, "right ").concat(PREFIX, "logout\"><small>Log out</small></a>\n        </div>\n    "));
-      $("#".concat(PREFIX, "_submit_comment")).addEventListener('click', function () {
+      onClick("#".concat(PREFIX, "_submit_comment"), function () {
         var text = $("#".concat(PREFIX, "_textarea")).value;
 
         if (text !== '') {
           octomments.add(text);
         }
       });
-      $("#".concat(PREFIX, "logout")).addEventListener('click', function () {
+      onClick("#".concat(PREFIX, "logout"), function () {
         octomments.logout();
       });
     };
 
+    function showError(str) {
+      var clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+      var parent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : $container;
+      if (clear) empty($container);
+      return createEl('div', 'error_user', parent, "<div>".concat(str, "</div>"));
+    }
+
+    octomments.on(octomments.ERROR, function (e, type) {
+      if (type === 1) {
+        empty($container);
+      } else if (type === 5) {
+        octomments.logout(false);
+        api.noUser(octomments.generateNewCommentURL());
+      } else if (type === 6 || type === 7 || type === 10) {
+        showError("There is a problem initializing your user. Wait a bit and click <a href=\"javascript:void(0);\" id=\"".concat(PREFIX, "user_try_again\">here</a> to try again."));
+        onClick("#".concat(PREFIX, "user_try_again"), octomments.initUser);
+      } else if (type === 8) {
+        var errEl = showError("There is a problem posting your comment. Please try again in a couple of minutes.", false, $(".".concat(PREFIX, "comment_right")));
+        errEl.style.marginTop = '1em';
+      } else if (type === 9) {
+        octomments.logout(false);
+        showError("Not authorized. Click <a href=\"javascript:void(0);\" id=\"".concat(PREFIX, "user_login\">here</a> to login again."));
+        onClick("#".concat(PREFIX, "user_login"), octomments.initUser);
+      }
+    });
     return api;
   }
 
   function OctommentsRenderer(octomments, containerSelector) {
-    var $container = $$1(containerSelector);
+    var $container = $(containerSelector);
 
     if (!$container) {
       throw new Error('Octomments: invalid container selector.');
     }
 
     var $root = createEl('div', 'root', $container);
-    var comments = Comments(createEl('div', 'comments', $root));
+    var comments = Comments(createEl('div', 'comments', $root), octomments);
     var newComment = NewComment(createEl('div', 'new-comment', $root), octomments);
-    var error = OError(createEl('div', 'error-container', $root));
     octomments // comments
     .on(octomments.COMMENTS_LOADING, comments.loading).on(octomments.COMMENTS_LOADED, comments.data) // user
     .on(octomments.USER_LOADING, newComment.loading).on(octomments.USER_NONE, newComment.noUser).on(octomments.USER_LOADED, newComment.form) // commenting
     .on(octomments.COMMENT_SAVING, function () {
-      $$1("#".concat(PREFIX, "new_comment")).style.opacity = 0.4;
-      var button = $$1("#".concat(PREFIX, "_submit_comment"));
-      var textarea = $$1("#".concat(PREFIX, "_textarea"));
+      $("#".concat(PREFIX, "new_comment")).style.opacity = 0.4;
+      var button = $("#".concat(PREFIX, "_submit_comment"));
+      var textarea = $("#".concat(PREFIX, "_textarea"));
       button.disabled = true;
       textarea.disabled = true;
       button.innerHTML = 'Posting your comment ...';
     }).on(octomments.COMMENT_SAVED, function (newComments) {
       newComment.form();
       comments.data(newComments);
-    }).on(octomments.ERROR, error.data);
+    });
   }
 
   return OctommentsRenderer;

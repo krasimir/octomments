@@ -27,3 +27,11 @@ export function formatDate(str) {
   const d = new Date(str);
   return `${d.getDate()}.${d.getMonth() + 1}.${d.getFullYear()}`;
 }
+export function onClick(sel, callback) {
+  const el = $(sel);
+  if (el) {
+    el.addEventListener('click', callback);
+  } else {
+    console.warn(`Octomments: ${sel} element doesn't exists in the DOM`);
+  }
+}

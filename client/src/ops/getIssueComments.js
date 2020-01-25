@@ -3,7 +3,7 @@ import { parseLinkHeader } from '../utils';
 
 export default function getIssueComments(api) {
   const { notify, options, error } = api;
-  const { endpoints, number } = options;
+  const { endpoints, number, github } = options;
   const withServer = !!endpoints;
   const commentsError = new Error(
     `Error getting comments for issue #${number}.`
@@ -47,8 +47,9 @@ export default function getIssueComments(api) {
   }
 
   function getIssueCommentsV3(page = 1) {
-    // const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments?page=${page}`;
-    const url = `http://localhost:3000/assets/mock.v3.commentsa.json`;
+    const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments?page=${page}`;
+    // const url = `http://localhost:3000/assets/mock.v3.comments.json`;
+    // const url = `http://localhost:3000/assets/mock.v3.no-comments.json`;
     fetch(url, {
       headers: { Accept: 'application/vnd.github.v3.html+json' },
     }).then((response, err) => {

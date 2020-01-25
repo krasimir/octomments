@@ -1,7 +1,6 @@
 import { PREFIX } from './constants';
 import { createEl, $ } from './utils';
 import Comments from './components/Comments';
-import OError from './components/Error';
 import NewComment from './components/NewComment';
 
 function OctommentsRenderer(octomments, containerSelector) {
@@ -15,7 +14,6 @@ function OctommentsRenderer(octomments, containerSelector) {
     createEl('div', 'new-comment', $root),
     octomments
   );
-  const error = OError(createEl('div', 'error-container', $root), octomments);
 
   octomments
     // comments
@@ -37,8 +35,7 @@ function OctommentsRenderer(octomments, containerSelector) {
     .on(octomments.COMMENT_SAVED, newComments => {
       newComment.form();
       comments.data(newComments);
-    })
-    .on(octomments.ERROR, error.data);
+    });
 }
 
 export default OctommentsRenderer;

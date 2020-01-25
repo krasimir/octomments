@@ -6,11 +6,11 @@
 
 ```
 .on(ERROR, (error, type) => {
-
+  // ...
 });
 ```
 
-`error` is a JavaScript while the `type` is one of the following:
+`error` is a JavaScript error while the `type` is one of the following:
 
 * 1 - comments: issue doesn't exists
 * 2 - comments: other problem loading the issue

@@ -1,0 +1,6 @@
+{
+  "private": true,
+  "scripts": {
+    "release": "cd client && yarn release && cd ../renderer && yarn release && cd ../server && yarn release"
+  }
+}

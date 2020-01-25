@@ -1,4 +1,4 @@
-import { createEl, empty } from '../utils';
+import { createEl, empty, onClick, $ } from '../utils';
 import { PREFIX } from '../constants';
 
 export default function NewComment($container, octomments) {
@@ -38,16 +38,48 @@ export default function NewComment($container, octomments) {
         </div>
     `
     );
-    $(`#${PREFIX}_submit_comment`).addEventListener('click', () => {
+    onClick(`#${PREFIX}_submit_comment`, () => {
       const text = $(`#${PREFIX}_textarea`).value;
       if (text !== '') {
         octomments.add(text);
       }
     });
-    $(`#${PREFIX}logout`).addEventListener('click', () => {
+    onClick(`#${PREFIX}logout`, () => {
       octomments.logout();
     });
   };
+
+  function showError(str, clear = true, parent = $container) {
+    if (clear) empty($container);
+    return createEl('div', 'error_user', parent, `<div>${str}</div>`);
+  }
+
+  octomments.on(octomments.ERROR, (e, type) => {
+    if (type === 1) {
+      empty($container);
+    } else if (type === 5) {
+      octomments.logout(false);
+      api.noUser(octomments.generateNewCommentURL());
+    } else if (type === 6 || type === 7 || type === 10) {
+      showError(
+        `There is a problem initializing your user. Wait a bit and click <a href="javascript:void(0);" id="${PREFIX}user_try_again">here</a> to try again.`
+      );
+      onClick(`#${PREFIX}user_try_again`, octomments.initUser);
+    } else if (type === 8) {
+      const errEl = showError(
+        `There is a problem posting your comment. Please try again in a couple of minutes.`,
+        false,
+        $(`.${PREFIX}comment_right`)
+      );
+      errEl.style.marginTop = '1em';
+    } else if (type === 9) {
+      octomments.logout(false);
+      showError(
+        `Not authorized. Click <a href="javascript:void(0);" id="${PREFIX}user_login">here</a> to login again.`
+      );
+      onClick(`#${PREFIX}user_login`, octomments.initUser);
+    }
+  });
 
   return api;
 }

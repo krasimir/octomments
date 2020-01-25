@@ -5,10 +5,10 @@
   "main": "build/octomments.js",
   "scripts": {
     "copy-js-to-server": "cpx \"build/octomments-renderer.js\" ../server/assets -w -v",
-    "copy-css-to-server": "cpx \"build/octomments-renderer.css\" ../server/assets -w -v",
-    "css": "cleancss -o ./build/octomments-renderer.css ./src/css/renderer.css",
+    "copy-css-to-server": "cpx \"build/octomments-renderer.min.css\" ../server/assets -w -v",
+    "css": "cleancss -o ./build/octomments-renderer.min.css ./src/css/renderer.css",
     "dev": "concurrently \"rollup -w -c\" \"yarn copy-js-to-server\" \"yarn copy-css-to-server\" \"yarn css\" \"onchange './src/css/renderer.css' -- yarn css \"",
-    "release": "rollup -c && uglifyjs --compress --mangle --output build/octomments-renderer.min.js -- build/octomments-renderer.js && yarn css",
+    "release": "rollup -c && uglifyjs --compress --mangle --output build/octomments-renderer.min.js -- build/octomments-renderer.js && yarn css && cp ./src/css/renderer.css ./build/octomments-renderer.css",
     "lint": "eslint ./server && eslint ./client",
     "lint:fix": "eslint ./server --fix && eslint ./client --fix"
   },

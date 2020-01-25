@@ -104,19 +104,37 @@
   padding: 0;
   border-radius: unset;
 }
+.O_error, .O_error_user {
+  color: #690909;
+  font-style: italic;
+  border: solid 1px #fbe0e0;
+  border-radius: 4px;
+  padding: 1em;
+  display: grid;
+  grid-template-columns: 35px 1fr;
+}
+.O_error a, .O_error_user a {
+  color: #690909;
+}
 .O_error, .O_no-comments {
   font-size: 1em;
   opacity: 0.7;
 }
+.O_error > div, .O_error_user > div {
+  align-self: center;
+}
+.O_error::before, .O_error_user::before, .O_no-comments::before {
+  display: block;
+  margin-right: 0.4em;
+}
 .O_error::before {
   content: "⚠️";
-  display: inline-block;
-  margin-right: 0.4em;
+}
+.O_error_user::before {
+  content: "🚷";
 }
 .O_no-comments::before {
   content: "🗒️";
-  display: inline-block;
-  margin-right: 0.4em;
 }
 .O_new-comment {
   margin-top: 1em;
