@@ -61,10 +61,9 @@ export default function getIssueComments(api) {
         }
         if (response.status === 403) {
           if (withServer) {
-            getIssueCommentsV4();
-          } else {
-            return error(new Error(`Rate limit exceeded.`), 4);
+            return getIssueCommentsV4();
           }
+          return error(new Error(`Rate limit exceeded.`), 4);
         }
         return error(commentsError, 2);
       } else {
