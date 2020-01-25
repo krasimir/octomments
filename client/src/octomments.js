@@ -50,8 +50,8 @@ function Octomments(options) {
   api.page = function(index) {
     getIssueComments(api, index);
   };
-  api.error = e => {
-    api.notify(ERROR, e);
+  api.error = (e, meta) => {
+    api.notify(ERROR, e, meta);
   };
 
   CONSTANTS.forEach(c => (api[c] = c));

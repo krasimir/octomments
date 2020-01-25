@@ -16,12 +16,12 @@ export default function getIssueComments(api) {
     fetch(`${endpoints.issue}?number=${number}`)
       .then((response, err) => {
         if (err) {
-          error(commentsError);
+          error(commentsError, 2);
         } else if (!response.ok) {
           if (response.status === 404) {
-            error(doesntExist);
+            error(doesntExist, 1);
           } else {
-            error(commentsError);
+            error(commentsError, 2);
           }
         } else {
           response
@@ -36,13 +36,13 @@ export default function getIssueComments(api) {
             })
             .catch(err => {
               console.err(err);
-              error(new Error(`Error parsing the API response`));
+              error(new Error(`Error parsing the API response`), 3);
             });
         }
       })
       .catch(err => {
         console.err(err);
-        error(commentsError);
+        error(commentsError, 2);
       });
   }
 
@@ -53,19 +53,19 @@ export default function getIssueComments(api) {
       headers: { Accept: 'application/vnd.github.v3.html+json' },
     }).then((response, err) => {
       if (err) {
-        error(commentsError);
+        error(commentsError, 2);
       } else if (!response.ok) {
         if (response.status === 404) {
-          return error(doesntExist);
+          return error(doesntExist, 1);
         }
         if (response.status === 403) {
           if (withServer) {
             getIssueCommentsV4();
           } else {
-            return error(new Error(`Rate limit exceeded.`));
+            return error(new Error(`Rate limit exceeded.`), 4);
           }
         }
-        return error(commentsError);
+        return error(commentsError, 2);
       } else {
         const link = response.headers.get('Link');
         let pagination = null;
@@ -95,7 +95,7 @@ export default function getIssueComments(api) {
           })
           .catch(err => {
             console.err(err);
-            error(commentsError);
+            error(commentsError, 2);
           });
       }
     });

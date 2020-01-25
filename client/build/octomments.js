@@ -133,14 +133,14 @@
         notify(USER_LOADED, api.user);
       } catch (err) {
         console.error(err);
-        error(new Error('Corrupted data in local storage.'));
+        error(new Error('Corrupted data in local storage.'), 5);
       }
     } else if (endpoints && getParameterByName('code')) {
       fetch("".concat(endpoints.token, "?code=").concat(getParameterByName('code'))).then(function (response, err) {
         if (err || !response.ok) {
           if (err) console.error(err);
           clearCurrentURL();
-          error(new Error('Problem getting access token.'));
+          error(new Error('Problem getting access token.'), 6);
         } else {
           response.json().then(function (data) {
             clearCurrentURL();
@@ -149,12 +149,12 @@
             api.user = data;
           })["catch"](function (err) {
             console.error(err);
-            error(new Error('Problem parsing access token response.'));
+            error(new Error('Problem parsing access token response.'), 7);
           });
         }
       })["catch"](function (err) {
         console.error(err);
-        error(new Error('Problem getting access token.'));
+        error(new Error('Problem getting access token.'), 6);
       });
     } else {
       notify(USER_NONE, newCommentURL);
@@ -175,12 +175,12 @@
     function getIssueCommentsV4() {
       fetch("".concat(endpoints.issue, "?number=").concat(number)).then(function (response, err) {
         if (err) {
-          error(commentsError);
+          error(commentsError, 2);
         } else if (!response.ok) {
           if (response.status === 404) {
-            error(doesntExist);
+            error(doesntExist, 1);
           } else {
-            error(commentsError);
+            error(commentsError, 2);
           }
         } else {
           response.json().then(function (data) {
@@ -192,12 +192,12 @@
             notify(COMMENTS_LOADED, newComments, null);
           })["catch"](function (err) {
             console.err(err);
-            error(new Error("Error parsing the API response"));
+            error(new Error("Error parsing the API response"), 3);
           });
         }
       })["catch"](function (err) {
         console.err(err);
-        error(commentsError);
+        error(commentsError, 2);
       });
     }
 
@@ -210,21 +210,21 @@
         }
       }).then(function (response, err) {
         if (err) {
-          error(commentsError);
+          error(commentsError, 2);
         } else if (!response.ok) {
           if (response.status === 404) {
-            return error(doesntExist);
+            return error(doesntExist, 1);
           }
 
           if (response.status === 403) {
             if (withServer) {
               getIssueCommentsV4();
             } else {
-              return error(new Error("Rate limit exceeded."));
+              return error(new Error("Rate limit exceeded."), 4);
             }
           }
 
-          return error(commentsError);
+          return error(commentsError, 2);
         } else {
           var link = response.headers.get('Link');
           var pagination = null;
@@ -255,7 +255,7 @@
             notify(COMMENTS_LOADED, newComments, pagination);
           })["catch"](function (err) {
             console.err(err);
-            error(commentsError);
+            error(commentsError, 2);
           });
         }
       });
@@ -285,32 +285,32 @@
       })
     }).then(function (response, err) {
       if (err) {
-        return error(failed);
+        return error(failed, 8);
       }
 
       if (!response.ok) {
         if (response.status === 401) {
           api.logout(false);
           notify(USER_NONE);
-          return error(new Error('Not authorized. Log in again.'));
+          return error(new Error('Not authorized. Log in again.'), 9);
         }
 
-        return error(failed);
+        return error(failed, 8);
       }
 
       response.json().then(function (data) {
         if (data.issue.comments) {
           notify(COMMENT_SAVED, data.issue.comments);
         } else {
-          error(new Error('Parsing new-comment response failed.'));
+          error(new Error('Parsing new-comment response failed.'), 10);
         }
       })["catch"](function (err) {
         console.error(err);
-        error(failed);
+        error(failed, 10);
       });
     })["catch"](function (err) {
       console.error(err);
-      error(failed);
+      error(failed, 8);
     });
   }
 
@@ -375,8 +375,8 @@
       getIssueComments(api);
     };
 
-    api.error = function (e) {
-      api.notify(ERROR, e);
+    api.error = function (e, meta) {
+      api.notify(ERROR, e, meta);
     };
 
     CONSTANTS.forEach(function (c) {

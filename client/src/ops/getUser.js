@@ -38,7 +38,7 @@ export default function getUser(api) {
       notify(USER_LOADED, api.user);
     } catch (err) {
       console.error(err);
-      error(new Error('Corrupted data in local storage.'));
+      error(new Error('Corrupted data in local storage.'), 5);
     }
   } else if (endpoints && getParameterByName('code')) {
     fetch(`${endpoints.token}?code=${getParameterByName('code')}`)
@@ -46,7 +46,7 @@ export default function getUser(api) {
         if (err || !response.ok) {
           if (err) console.error(err);
           clearCurrentURL();
-          error(new Error('Problem getting access token.'));
+          error(new Error('Problem getting access token.'), 6);
         } else {
           response
             .json()
@@ -58,13 +58,13 @@ export default function getUser(api) {
             })
             .catch(err => {
               console.error(err);
-              error(new Error('Problem parsing access token response.'));
+              error(new Error('Problem parsing access token response.'), 7);
             });
         }
       })
       .catch(err => {
         console.error(err);
-        error(new Error('Problem getting access token.'));
+        error(new Error('Problem getting access token.'), 6);
       });
   } else {
     notify(USER_NONE, newCommentURL);

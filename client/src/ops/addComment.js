@@ -21,15 +21,15 @@ export default function addComment(api, text) {
   })
     .then((response, err) => {
       if (err) {
-        return error(failed);
+        return error(failed, 8);
       }
       if (!response.ok) {
         if (response.status === 401) {
           api.logout(false);
           notify(USER_NONE);
-          return error(new Error('Not authorized. Log in again.'));
+          return error(new Error('Not authorized. Log in again.'), 9);
         }
-        return error(failed);
+        return error(failed, 8);
       }
       response
         .json()
@@ -37,16 +37,16 @@ export default function addComment(api, text) {
           if (data.issue.comments) {
             notify(COMMENT_SAVED, data.issue.comments);
           } else {
-            error(new Error('Parsing new-comment response failed.'));
+            error(new Error('Parsing new-comment response failed.'), 10);
           }
         })
         .catch(err => {
           console.error(err);
-          error(failed);
+          error(failed, 10);
         });
     })
     .catch(err => {
       console.error(err);
-      error(failed);
+      error(failed, 8);
     });
 }
