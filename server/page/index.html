@@ -12,11 +12,14 @@
     <header>
       <img src="/assets/logo.jpg" alt="Octomments"/>
       <h1>Octomments</h1>
-      <h2>Using GitHub issues as a comment plugin for your web site.</h2>
+      <h2>
+        Using GitHub issues as a comment plugin for your web site.<br /><br />
+        <!-- Place this tag where you want the button to render. -->
+        <a class="github-button" href="https://github.com/krasimir/octomments" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star krasimir/octomments on GitHub">Star</a>
+      </h2>
     </header>
     <section>
       <div>
-        <h3>Code</h3>
         <pre><code>&lt;link href="octomments-renderer.min.css" rel="stylesheet"&gt;
 &lt;script src="octomments.min.js">&lt;script&gt;
 &lt;script src="octomments-renderer.min.js">&lt;/script&gt;
@@ -30,22 +33,22 @@
     renderer: [OctommentsRenderer, '#comments']
   }).init();
 &lt;script&gt;</code></pre>
+      <div class="info">
+        Documentation:
+        <ul>
+          <li><a href="https://github.com/krasimir/octomments/tree/master/client">Client</a> (required) - <small>you need this to fetch the comments from GitHub</small></li>
+          <li><a href="https://github.com/krasimir/octomments/tree/master/renderer">Renderer</a> (optional) -  <small>provides a default UI.</small></li>
+          <li><a href="https://github.com/krasimir/octomments/tree/master/server">Server</a> (optional) - <small>without this your users will have to go to github.com to add new comments.</small></li>
+        </ul>
+        <hr />
+        <small>Octomments is an open source project and if you feel that something is wrong please consider opening a PR <a href="https://github.com/krasimir/octomments">here</a>.<br /><br />Author: <a href="http://krasimirtsonev.com/blog">Krasimir Tsonev</a></small>
+      </div>
       </div>
       <div class="pointer">👉</div>
       <div>
-        <h3>Result</h3>
         <div id="comments"></div>
       </div>
     </section>
-    <div class="info">
-      <!-- Place this tag where you want the button to render. -->
-      <a class="github-button" href="https://github.com/krasimir/octomments" data-icon="octicon-star" data-size="large" data-show-count="true" aria-label="Star krasimir/octomments on GitHub">Star</a>
-      <br /><br />
-      <small>Octomments is an open source project and if you feel that something is wrong please consider opening a PR here <a href="https://github.com/krasimir/octomments">github.com/krasimir/octomments</a>.</small>
-      <span class="author">
-        <small>Author: <a href="http://krasimirtsonev.com/blog">Krasimir Tsonev</a></small>
-      </span>
-    </div>
   </div>
   <script src="/assets/octomments.js"></script>
   <script src="/assets/octomments-renderer.js"></script>
