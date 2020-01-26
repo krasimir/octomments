@@ -96,3 +96,8 @@ ul {
   padding: 0;
   margin: 0.3em 0 0 1.2em;
 }
+#comments {
+  border: solid 1px #eaeaea;
+  padding: 1em;
+  border-radius: 4px;
+}

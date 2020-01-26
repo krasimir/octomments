@@ -1,8 +1,8 @@
 {
   "name": "octomments-renderer",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "The default renderer for Octomments",
-  "main": "build/octomments.js",
+  "main": "build/octomments-renderer.js",
   "scripts": {
     "copy-js-to-server": "cpx \"build/octomments-renderer.js\" ../server/assets -w -v",
     "copy-css-to-server": "cpx \"build/octomments-renderer.min.css\" ../server/assets -w -v",
