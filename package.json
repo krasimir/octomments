@@ -2,6 +2,6 @@
   "private": true,
   "scripts": {
     "copy-files-in-build": "rm -rf ./build/* && cp ./client/build/* ./build && cp ./renderer/build/* ./build",
-    "release": "cd client && yarn release && cd ../renderer && yarn release && cd ../server && yarn release && cd ../ && yarn copy-files-in-build"
+    "release": "cd client && yarn release && cd ../renderer && yarn release && cd ../ yarn copy-files-in-build && cd ./server && yarn release && cd ../"
   }
 }
