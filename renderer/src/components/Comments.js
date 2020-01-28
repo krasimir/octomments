@@ -1,25 +1,58 @@
 import { PREFIX, GITHUB } from '../constants';
-import { createEl, empty, formatDate, $, onClick } from '../utils';
+import { createEl, empty, formatDate, onClick } from '../utils';
 
 export default function Comments($container, octomments) {
   const api = {};
-  let state = 'idle';
+  let $moreCommentsLink;
+  let arr = [];
 
   api.loading = () => {
-    state = 'loading';
-    empty($container);
-    createEl('small', 'loading', $container, 'Loading comments ...');
+    if (arr.length === 0) {
+      empty($container);
+      createEl(
+        'div',
+        'summary',
+        $container,
+        `
+      <div>Loading comments ...</div>
+        <div>
+          <a href="https://octomments.now.sh/" target="_blank">
+            ${GITHUB(14)}
+          </a>
+        </div>`
+      );
+    } else {
+      $moreCommentsLink.innerHTML = `
+        <div></div>
+        <div class="${PREFIX}more-comments-loading"><small>loading ...</small></div>
+      `;
+    }
   };
   api.noComments = () => {
-    state = 'idle';
     empty($container);
   };
+  api.newComment = newComments => {
+    api.data(newComments);
+  };
   api.data = (data, pagination) => {
-    if (state === 'loading') {
-      state = 'data';
-      empty($container);
-    }
-    data.forEach(comment => {
+    arr = arr.concat(data);
+    empty($container);
+    createEl(
+      'div',
+      'summary',
+      $container,
+      `
+        <div id="${PREFIX}num-of-comments">${arr.length} comment${
+        arr.length !== 1 ? 's' : ''
+      }</div>
+        <div>
+          <a href="https://octomments.now.sh/" target="_blank">
+            ${GITHUB(14)}
+          </a>
+        </div>
+      `
+    );
+    arr.forEach(comment => {
       createEl(
         'div',
         'comment',
@@ -43,6 +76,24 @@ export default function Comments($container, octomments) {
         `
       );
     });
+    if (pagination && pagination.next) {
+      $moreCommentsLink = createEl(
+        'div',
+        `comment ${PREFIX}more-comments`,
+        $container,
+        `
+          <div></div>
+          <div>
+            <a href="javascript:void(0);" id="${PREFIX}more-comments-link">
+              <small>... load more comments</small>
+            </a>
+          </div>
+        `
+      );
+      onClick(`#${PREFIX}more-comments-link`, () => {
+        octomments.page(pagination.next.page);
+      });
+    }
   };
 
   function showError(str) {

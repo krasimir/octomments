@@ -34,7 +34,7 @@ function OctommentsRenderer(octomments, containerSelector) {
     })
     .on(octomments.COMMENT_SAVED, newComments => {
       newComment.form();
-      comments.data(newComments);
+      comments.newComment(newComments);
     });
 }
 

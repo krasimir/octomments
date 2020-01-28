@@ -1,6 +1,11 @@
+.O_tac {
+  text-align: center;
+}
+.O_tar {
+  text-align: right;
+}
 .O_root a {
   color: #000;
-  font-weight: bold;
 }
 .O_root a:hover {
   color: blue;
@@ -8,15 +13,14 @@
 .O_right {
   float: right;
 }
-.O_loading {
+.O_state {
   opacity: 0.7;
+  text-align: center;
 }
 .O_comment {
   display: grid;
   grid-template-columns: 60px 1fr;
   column-gap: 1em;
-}
-.O_comment + .O_comment {
   margin-top: 1em;
 }
 .O_comment_left img {
@@ -24,7 +28,6 @@
   border-radius: 67% 33% 35% 65% / 38% 30% 70% 62%;
 }
 .O_comment_right {
-  border-top: solid 1px #c4c4c4;
   padding: 0.6em 0 0 0;
   min-width: 0; /* https://css-tricks.com/preventing-a-grid-blowout */
 }
@@ -40,6 +43,8 @@
 }
 .O_comment_body {
   font-size: 0.9em;
+  word-break: normal;
+  word-wrap: break-word;
 }
 .O_comment_body img {
   max-width: 100%;
@@ -116,14 +121,14 @@
 .O_error a, .O_error_user a {
   color: #690909;
 }
-.O_error, .O_no-comments {
+.O_error {
   font-size: 1em;
   opacity: 0.7;
 }
 .O_error > div, .O_error_user > div {
   align-self: center;
 }
-.O_error::before, .O_error_user::before, .O_no-comments::before {
+.O_error::before, .O_error_user::before {
   display: block;
   margin-right: 0.4em;
 }
@@ -132,9 +137,6 @@
 }
 .O_error_user::before {
   content: "🚷";
-}
-.O_no-comments::before {
-  content: "🗒️";
 }
 .O_new-comment {
   margin-top: 1em;
@@ -156,7 +158,7 @@
   opacity: 0.8;
   box-sizing: border-box;
 }
-.O_new-comment button, .as-button {
+.O_new-comment button {
   border: solid 2px #c4c4c4;
   border-radius: 4px;
   padding: 0.6em 1em;
@@ -167,11 +169,15 @@
   background: #f7f7f7;
   text-decoration: none;;
 }
-.O_new-comment button:hover, .as-button:hover {
+.O_new-comment button:hover {
   background: #c4c4c4;
 }
-.O_new-comment button:active, .as-button:active {
+.O_new-comment button:active {
   transform: translateY(2px);
+}
+.O_new-comment button:disabled {
+  background: #f7f7f7;
+  cursor: wait; 
 }
 .O_logout {
   opacity: 0.3;
@@ -181,4 +187,31 @@
 }
 .O_error-container {
   margin-top: 1em;
+}
+.O_summary {
+  display: grid;
+  grid-template-columns: 50% 50%;
+  opacity: 0.5;
+  font-size: 0.6em;
+  padding-bottom: 1em;
+  border-bottom: dotted 1px #c4c4c4;
+}
+.O_summary > div:last-child {
+  text-align: right;
+}
+.O_more-comments {
+  margin-bottom: 2em;
+}
+#O_more-comments-link {
+  opacity: 0.3;
+}
+#O_more-comments-link:hover {
+  opacity: 1;
+}
+.O_more-comments-loading {
+  opacity: 0.3;
+  cursor: wait;
+}
+.O_loading-user {
+  opacity: 0.3;
 }

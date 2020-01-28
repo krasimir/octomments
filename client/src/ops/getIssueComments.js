@@ -1,7 +1,7 @@
 import { COMMENTS_LOADING, COMMENTS_LOADED } from '../constants';
 import { parseLinkHeader } from '../utils';
 
-export default function getIssueComments(api) {
+export default function getIssueComments(api, p) {
   const { notify, options, error } = api;
   const { endpoints, number, github } = options;
   const withServer = !!endpoints;
@@ -35,13 +35,13 @@ export default function getIssueComments(api) {
               notify(COMMENTS_LOADED, newComments, null);
             })
             .catch(err => {
-              console.err(err);
+              console.error(err);
               error(new Error(`Error parsing the API response`), 3);
             });
         }
       })
       .catch(err => {
-        console.err(err);
+        console.error(err);
         error(commentsError, 2);
       });
   }
@@ -94,12 +94,12 @@ export default function getIssueComments(api) {
             notify(COMMENTS_LOADED, newComments, pagination);
           })
           .catch(err => {
-            console.err(err);
+            console.error(err);
             error(commentsError, 2);
           });
       }
     });
   }
 
-  getIssueCommentsV3();
+  getIssueCommentsV3(p);
 }

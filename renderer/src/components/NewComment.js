@@ -4,17 +4,27 @@ import { PREFIX } from '../constants';
 export default function NewComment($container, octomments) {
   const api = {};
 
+  $container.style.display = 'none';
+
   api.loading = () => {
     empty($container);
-    createEl('small', 'loading', $container, 'Loading user ...');
+    createEl(
+      'small',
+      'comment',
+      $container,
+      `
+      <div></div>
+      <div class="${PREFIX}loading-user"><small>Loading user ...</small></div>
+      `
+    );
   };
   api.noUser = url => {
     empty($container);
     createEl(
       'div',
-      'loading',
+      'tar',
       $container,
-      `<a href="${url}" class="as-button">✍️ Post a comment</a>`
+      `<a href="${url}" class="${PREFIX}as-button">&#x271A; new comment</a>`
     );
   };
   api.form = () => {
@@ -79,6 +89,9 @@ export default function NewComment($container, octomments) {
       );
       onClick(`#${PREFIX}user_login`, octomments.initUser);
     }
+  });
+  octomments.on(octomments.COMMENTS_LOADED, () => {
+    $container.style.display = 'block';
   });
 
   return api;

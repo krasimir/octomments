@@ -1,7 +1,6 @@
 {
   "name": "octomments-server",
-  "private": true,
-  "version": "1.0.0",
+  "version": "0.2.1",
   "description": "",
   "main": "octomments.js",
   "scripts": {
@@ -11,7 +10,6 @@
   "author": "Krasimir Tsonev",
   "license": "MIT",
   "dependencies": {
-    "marked": "0.8.0",
     "micro": "9.3.4",
     "superagent": "5.2.1"
   },
