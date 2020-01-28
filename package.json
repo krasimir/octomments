@@ -3,6 +3,6 @@
   "scripts": {
     "copy-files-in-build": "rm -rf ./build/* && cp ./client/build/* ./build && cp ./renderer/build/* ./build && cat ./build/octomments.min.js ./build/octomments-renderer.min.js > build/octomments-pack.min.js",
     "bump-versions": "node ./scripts/bumping-versions.js",
-    "release": "cd client && yarn release && cd ../renderer && yarn release && cd ../ yarn copy-files-in-build && cd ./server && yarn release && cd ../"
+    "release": "cd client && yarn release && cd ../renderer && yarn release && cd ../ yarn copy-files-in-build && cd ./server && yarn release && cd ../ && yarn bump-versions"
   }
 }
