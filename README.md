@@ -2,7 +2,7 @@
 
 <h1 align="center">Octomments</h1>
 
-<h3 align="center">Using GitHub issues as a comment plugin for your web site.</h3>
+<h3 align="center">Using GitHub issues as a comment plugin.</h3>
 
 <p align="center"><a href="https://ocs.now.sh/">https://ocs.now.sh/</a>.</p>
 

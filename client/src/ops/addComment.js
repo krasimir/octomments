@@ -1,25 +1,26 @@
 import { COMMENT_SAVING, USER_NONE, COMMENT_SAVED } from '../constants';
+import { normalizeComment } from '../utils';
 
 export default function addComment(api, text) {
   const { notify, error, options } = api;
-  const { endpoints, number } = options;
+  const { number, github } = options;
   const failed = new Error('Adding a new comment failed.');
 
   notify(COMMENT_SAVING);
 
-  fetch(`${endpoints.issue}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      comment: true,
-      body: text,
-      token: api.user.token,
-      number,
-    }),
-  })
-    .then((response, err) => {
+  const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments`;
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `token ${api.user.token}`,
+    Accept: 'application/vnd.github.v3.html+json',
+  };
+
+  function catchErrorHandler(err) {
+    console.error(err);
+    error(failed, 10);
+  }
+  function processResponse(callback) {
+    return (response, err) => {
       if (err) {
         return error(failed, 8);
       }
@@ -29,24 +30,29 @@ export default function addComment(api, text) {
           notify(USER_NONE);
           return error(new Error('Not authorized. Log in again.'), 9);
         }
+        if (response.status === 403) {
+          return error(new Error('Rate limit exceeded.'), 4);
+        }
         return error(failed, 8);
       }
       response
         .json()
         .then(data => {
-          if (data.issue.comments) {
-            notify(COMMENT_SAVED, data.issue.comments);
+          if (data) {
+            callback(data);
           } else {
             error(new Error('Parsing new-comment response failed.'), 10);
           }
         })
-        .catch(err => {
-          console.error(err);
-          error(failed, 10);
-        });
-    })
-    .catch(err => {
-      console.error(err);
-      error(failed, 8);
-    });
+        .catch(catchErrorHandler);
+    };
+  }
+
+  fetch(url, { method: 'POST', headers, body: JSON.stringify({ body: text }) })
+    .then(
+      processResponse(item => {
+        notify(COMMENT_SAVED, [normalizeComment(item)]);
+      })
+    )
+    .catch(catchErrorHandler);
 }

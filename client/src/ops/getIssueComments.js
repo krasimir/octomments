@@ -1,5 +1,5 @@
 import { COMMENTS_LOADING, COMMENTS_LOADED } from '../constants';
-import { parseLinkHeader } from '../utils';
+import { parseLinkHeader, normalizeComment } from '../utils';
 
 export default function getIssueComments(api, p) {
   const { notify, options, error } = api;
@@ -48,8 +48,6 @@ export default function getIssueComments(api, p) {
 
   function getIssueCommentsV3(page = 1) {
     const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments?page=${page}`;
-    // const url = `http://localhost:3000/assets/mock.v3.comments.json`;
-    // const url = `http://localhost:3000/assets/mock.v3.no-comments.json`;
     fetch(url, {
       headers: { Accept: 'application/vnd.github.v3.html+json' },
     }).then((response, err) => {
@@ -75,18 +73,7 @@ export default function getIssueComments(api, p) {
         response
           .json()
           .then(data => {
-            const newComments = data.map(item => ({
-              id: item.id,
-              url: item.html_url,
-              author: {
-                login: item.user.login,
-                avatarUrl: item.user.avatar_url,
-                url: item.user.html_url,
-              },
-              body: item.body_html,
-              createdAt: item.created_at,
-              updatedAt: item.updated_at,
-            }));
+            const newComments = data.map(normalizeComment);
             api.data = {
               comments: api.data.comments.concat(newComments),
               pagination,

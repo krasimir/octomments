@@ -97,6 +97,20 @@
 
     return links;
   }
+  function normalizeComment(item) {
+    return {
+      id: item.id,
+      url: item.html_url,
+      author: {
+        login: item.user.login,
+        avatarUrl: item.user.avatar_url,
+        url: item.user.html_url
+      },
+      body: item.body_html,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at
+    };
+  }
 
   var ERROR = 'ERROR';
   var USER_LOADING = 'USER_LOADING';
@@ -202,9 +216,7 @@
 
     function getIssueCommentsV3() {
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page); // const url = `http://localhost:3000/assets/mock.v3.comments.json`;
-      // const url = `http://localhost:3000/assets/mock.v3.no-comments.json`;
-
+      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page);
       fetch(url, {
         headers: {
           Accept: 'application/vnd.github.v3.html+json'
@@ -235,20 +247,7 @@
           }
 
           response.json().then(function (data) {
-            var newComments = data.map(function (item) {
-              return {
-                id: item.id,
-                url: item.html_url,
-                author: {
-                  login: item.user.login,
-                  avatarUrl: item.user.avatar_url,
-                  url: item.user.html_url
-                },
-                body: item.body_html,
-                createdAt: item.created_at,
-                updatedAt: item.updated_at
-              };
-            });
+            var newComments = data.map(normalizeComment);
             api.data = {
               comments: api.data.comments.concat(newComments),
               pagination: pagination
@@ -269,50 +268,61 @@
     var notify = api.notify,
         error = api.error,
         options = api.options;
-    var endpoints = options.endpoints,
-        number = options.number;
+    var number = options.number,
+        github = options.github;
     var failed = new Error('Adding a new comment failed.');
     notify(COMMENT_SAVING);
-    fetch("".concat(endpoints.issue), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        comment: true,
-        body: text,
-        token: api.user.token,
-        number: number
-      })
-    }).then(function (response, err) {
-      if (err) {
-        return error(failed, 8);
-      }
+    var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments");
+    var headers = {
+      'Content-Type': 'application/json',
+      Authorization: "token ".concat(api.user.token),
+      Accept: 'application/vnd.github.v3.html+json'
+    };
 
-      if (!response.ok) {
-        if (response.status === 401) {
-          api.logout(false);
-          notify(USER_NONE);
-          return error(new Error('Not authorized. Log in again.'), 9);
-        }
-
-        return error(failed, 8);
-      }
-
-      response.json().then(function (data) {
-        if (data.issue.comments) {
-          notify(COMMENT_SAVED, data.issue.comments);
-        } else {
-          error(new Error('Parsing new-comment response failed.'), 10);
-        }
-      })["catch"](function (err) {
-        console.error(err);
-        error(failed, 10);
-      });
-    })["catch"](function (err) {
+    function catchErrorHandler(err) {
       console.error(err);
-      error(failed, 8);
-    });
+      error(failed, 10);
+    }
+
+    function processResponse(callback) {
+      return function (response, err) {
+        if (err) {
+          return error(failed, 8);
+        }
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            api.logout(false);
+            notify(USER_NONE);
+            return error(new Error('Not authorized. Log in again.'), 9);
+          }
+
+          if (response.status === 403) {
+            return error(new Error('Rate limit exceeded.'), 4);
+          }
+
+          return error(failed, 8);
+        }
+
+        response.json().then(function (data) {
+          if (data) {
+            callback(data);
+          } else {
+            error(new Error('Parsing new-comment response failed.'), 10);
+          }
+        })["catch"](catchErrorHandler);
+      };
+    }
+
+    fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        body: text
+      })
+    }).then(processResponse(function (item) {
+      notify(COMMENT_SAVED, [normalizeComment(item)]);
+    }))["catch"](catchErrorHandler);
   }
 
   function Octomments(options) {

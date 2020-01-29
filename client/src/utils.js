@@ -38,3 +38,18 @@ export function parseLinkHeader(link) {
   }
   return links;
 }
+
+export function normalizeComment(item) {
+  return {
+    id: item.id,
+    url: item.html_url,
+    author: {
+      login: item.user.login,
+      avatarUrl: item.user.avatar_url,
+      url: item.user.html_url,
+    },
+    body: item.body_html,
+    createdAt: item.created_at,
+    updatedAt: item.updated_at,
+  };
+}
