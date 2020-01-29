@@ -1,4 +1,4 @@
-<div align="center"><img src="./assets/logo.jpg" /></div>
+<div align="center"><img src="./_assets/logo.jpg" /></div>
 
 <h1 align="center">Octomments</h1>
 
