@@ -1,16 +1,13 @@
 {
   "name": "octomments-renderer",
-  "version": "0.2.13",
+  "version": "0.2.17",
   "description": "The default renderer for Octomments",
-  "main": "build/octomments-renderer.js",
+  "main": "build/ocs-ui.js",
   "scripts": {
-    "copy-js-to-server": "cpx \"build/octomments-renderer.js\" ../server/assets -w -v",
-    "copy-css-to-server": "cpx \"build/octomments-renderer.min.css\" ../server/assets -w -v",
-    "css": "cleancss -o ./build/octomments-renderer.min.css ./src/css/renderer.css",
-    "dev": "concurrently \"rollup -w -c\" \"yarn copy-js-to-server\" \"yarn copy-css-to-server\" \"yarn css\" \"onchange './src/css/renderer.css' -- yarn css \"",
-    "release": "rollup -c && uglifyjs --compress --mangle --output build/octomments-renderer.min.js -- build/octomments-renderer.js && yarn css && cp ./src/css/renderer.css ./build/octomments-renderer.css",
-    "lint": "eslint ./server && eslint ./client",
-    "lint:fix": "eslint ./server --fix && eslint ./client --fix"
+    "clean": "rm -rf ./build/*",
+    "minify-css": "cleancss -o ./build/ocs-ui.min.css ./src/css/renderer.css",
+    "dev": "yarn clean && concurrently \"rollup -w -c\" \"yarn minify-css\" \"onchange './src/css/renderer.css' -- yarn minify-css \"",
+    "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-ui.min.js -- build/ocs-ui.js && yarn minify-css && cp ./src/css/renderer.css ./build/ocs-ui.css && cp ./build/* ../build"
   },
   "repository": {
     "type": "git",

@@ -7,7 +7,7 @@ export default {
   output: {
     format: 'umd',
     name: 'OctommentsRenderer',
-    file: 'build/octomments-renderer.js',
+    file: 'build/ocs-ui.js',
   },
   plugins: [
     commonjs(),

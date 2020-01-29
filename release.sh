@@ -1,13 +1,15 @@
 #!/bin/sh
 
-yarn bump-versions
+node ./scripts/bumping-versions.js
 cd client
-yarn release
+yarn build
 npm publish
 cd ../renderer
-yarn release
+yarn build
 npm publish
 cd ../
-yarn copy-files-in-build
+cat ./build/ocs-core.min.js ./build/ocs-ui.min.js > build/ocs.min.js
+rm -rf ./server/assets/*
+cp ./build/* ./server/assets
 cd ./server
 npm publish

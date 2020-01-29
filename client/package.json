@@ -1,14 +1,12 @@
 {
   "name": "octomments",
-  "version": "0.2.13",
+  "version": "0.2.17",
   "description": "A small library that offers GitHub issues as comments for your site/blog",
-  "main": "build/octomments.js",
+  "main": "build/ocs-core.js",
   "scripts": {
-    "copy-js-to-server": "cpx \"build/octomments.js\" ../server/assets -w -v",
-    "dev": "concurrently \"rollup -w -c\" \"yarn copy-js-to-server\"",
-    "release": "rollup -c && uglifyjs --compress --mangle --output build/octomments.min.js -- build/octomments.js",
-    "lint": "eslint ./server && eslint ./client",
-    "lint:fix": "eslint ./server --fix && eslint ./client --fix"
+    "clean": "rm -rf ./build/*",
+    "dev": "yarn clean && concurrently \"rollup -w -c\"",
+    "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-core.min.js -- build/ocs-core.js && cp ./build/* ../build"
   },
   "repository": {
     "type": "git",

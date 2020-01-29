@@ -104,13 +104,13 @@ if (
 createFolder(`${projectRoot}/assets`);
 console.log(`└─ assets`);
 const assets = [
-  'assets/octomments-pack.min.js',
-  'assets/octomments-renderer.css',
-  'assets/octomments-renderer.min.css',
-  'assets/octomments-renderer.js',
-  'assets/octomments-renderer.min.js',
-  'assets/octomments.js',
-  'assets/octomments.min.js',
+  'assets/ocs-bundle.min.js',
+  'assets/ocs-renderer.js',
+  'assets/ocs-renderer.min.js',
+  'assets/ocs.css',
+  'assets/ocs.js',
+  'assets/ocs.min.css',
+  'assets/ocs.min.js',
 ];
 assets.forEach(f => {
   copy(`${setupRoot}/${f}`, `${projectRoot}/${f}`);

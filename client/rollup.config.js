@@ -7,7 +7,7 @@ export default {
   output: {
     format: 'umd',
     name: 'Octomments',
-    file: 'build/octomments.js',
+    file: 'build/ocs-core.js',
   },
   plugins: [
     commonjs(),
