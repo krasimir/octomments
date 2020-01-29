@@ -30,9 +30,9 @@ Because I wanted:
 ## Development locally
 
 You need to run four processes in four different terminals. Sorry! That's because we have:
-* core library building and watching
-* renderer library building and watching
-* octomments server for authentication and GitHub v4 API support
-* a small static server that loads a page containing Octomments integration
+* core library building and watching (`client` folder)
+* renderer library building and watching (`renderer` folder)
+* octomments server for authentication and GitHub v4 API support (`server` folder)
+* a small static server that loads a page containing Octomments integration (`_local` folder)
 
-So, in each one of the following folder run `yarn` - `_local`, `client`, `renderer` and `server`. Then open four terminals pointing to those folders and run `yarn dev`. Then open [http://localhost:3000/](http://localhost:3000/).
+In each of the folders run `yarn install` and then `yarn dev`. All the bits except `server` will work without any other changes. For the server however you need to create `server/api/config.local.json` file. Use `server/api/config.example.json` as a template and check the [Server](./server/README.md) documentation to understand what is what.
