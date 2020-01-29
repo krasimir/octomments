@@ -1,11 +1,11 @@
 {
   "name": "octomments",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "A small library that offers GitHub issues as comments for your site/blog",
   "main": "build/ocs-core.js",
   "scripts": {
     "clean": "rm -rf ./build/*",
-    "dev": "yarn clean && concurrently \"rollup -w -c\"",
+    "dev": "rollup -w -c",
     "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-core.min.js -- build/ocs-core.js && cp ./build/* ../build"
   },
   "repository": {
@@ -30,7 +30,6 @@
     "@rollup/plugin-commonjs": "11.0.1",
     "@rollup/plugin-node-resolve": "7.0.0",
     "babel-eslint": "9.0.0",
-    "concurrently": "5.0.2",
     "cpx": "1.5.0",
     "eslint": "5.16.0",
     "eslint-config-airbnb": "17.1.1",

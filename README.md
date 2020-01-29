@@ -26,3 +26,13 @@ Because I wanted:
 * [Client](./client/README.md)
 * [Server](./server/README.md)
 * [Renderer](./renderer/README.md)
+
+## Development locally
+
+You need to run four processes in four different terminals. Sorry! That's because we have:
+* core library building and watching
+* renderer library building and watching
+* octomments server for authentication and GitHub v4 API support
+* a small static server that loads a page containing Octomments integration
+
+So, in each one of the following folder run `yarn` - `_local`, `client`, `renderer` and `server`. Then open four terminals pointing to those folders and run `yarn dev`. Then open [http://localhost:3000/](http://localhost:3000/).

@@ -1,10 +1,10 @@
 {
   "name": "octomments-server",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "",
   "main": "./setup.js",
   "scripts": {
-    "dev": "now dev"
+    "dev": "now dev -l 3650"
   },
   "author": "Krasimir Tsonev",
   "license": "MIT",

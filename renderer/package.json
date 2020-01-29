@@ -1,13 +1,14 @@
 {
   "name": "octomments-renderer",
-  "version": "0.2.18",
+  "version": "0.2.19",
   "description": "The default renderer for Octomments",
   "main": "build/ocs-ui.js",
   "scripts": {
     "clean": "rm -rf ./build/*",
     "minify-css": "cleancss -o ./build/ocs-ui.min.css ./src/css/renderer.css",
-    "dev": "yarn clean && concurrently \"rollup -w -c\" \"yarn minify-css\" \"onchange './src/css/renderer.css' -- yarn minify-css \"",
-    "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-ui.min.js -- build/ocs-ui.js && yarn minify-css && cp ./src/css/renderer.css ./build/ocs-ui.css && cp ./build/* ../build"
+    "copy-css": "cp ./src/css/renderer.css ./build/ocs-ui.css",
+    "dev": "concurrently \"rollup -w -c\" \"yarn copy-css\" \"onchange './src/css/renderer.css' -- yarn copy-css\"",
+    "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-ui.min.js -- build/ocs-ui.js && yarn minify-css && yarn copy-css && cp ./build/* ../build"
   },
   "repository": {
     "type": "git",

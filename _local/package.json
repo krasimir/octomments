@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "dev": "./node_modules/.bin/serve -l 3000 -S"
+  },
+  "name": "octomments-local",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "serve": "11.3.0"
+  }
+}

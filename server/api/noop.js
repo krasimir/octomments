@@ -7,6 +7,6 @@ module.exports = corsMultipleAllowOrigin({ origin: config.origins })(
   async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.statusCode = 200;
-    res.end(JSON.stringify({}));
+    res.end(JSON.stringify({ noop: 'ok' }));
   }
 );
