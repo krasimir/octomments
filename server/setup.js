@@ -122,13 +122,10 @@ console.log('\n\nNext steps:\n');
 console.log(`1. Edit api/config.json`);
 console.log(`Fill the dots with your settings.\n`);
 
-console.log(`2. Edit ${name}/now.json`);
-console.log(`Amend the CORS header to match your domain.\n`);
-
-console.log(`3. Run "now --prod"`);
+console.log(`2. Run "now --prod"`);
 console.log(`To deploy your server.\n`);
 
-console.log(`4. Use the server`);
+console.log(`3. Use the server`);
 console.log('endpoints');
 console.log(`└─ <url>/octomments/issue`);
 console.log(`└─ <url>/octomments/token`);
@@ -136,5 +133,7 @@ console.log('assets');
 assets.forEach(asset => {
   console.log(`└─ <url>/${asset}`);
 });
+
+console.log('\nMore info here https://github.com/krasimir/octomments');
 
 console.log('');
