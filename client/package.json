@@ -1,6 +1,6 @@
 {
   "name": "octomments",
-  "version": "0.2.17",
+  "version": "0.2.18",
   "description": "A small library that offers GitHub issues as comments for your site/blog",
   "main": "build/ocs-core.js",
   "scripts": {

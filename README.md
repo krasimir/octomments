@@ -4,7 +4,7 @@
 
 <h3 align="center">Using GitHub issues as a comment plugin for your web site.</h3>
 
-<p align="center"><a href="https://octomments.now.sh/">https://octomments.now.sh</a>.</p>
+<p align="center"><a href="https://ocs.now.sh/">https://ocs.now.sh/</a>.</p>
 
 ## What
 

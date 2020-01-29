@@ -104,12 +104,12 @@ if (
 createFolder(`${projectRoot}/assets`);
 console.log(`└─ assets`);
 const assets = [
-  'assets/ocs-bundle.min.js',
-  'assets/ocs-renderer.js',
-  'assets/ocs-renderer.min.js',
-  'assets/ocs.css',
-  'assets/ocs.js',
-  'assets/ocs.min.css',
+  'assets/ocs-core.js',
+  'assets/ocs-core.min.js',
+  'assets/ocs-ui.css',
+  'assets/ocs-ui.js',
+  'assets/ocs-ui.min.css',
+  'assets/ocs-ui.min.js',
   'assets/ocs.min.js',
 ];
 assets.forEach(f => {
