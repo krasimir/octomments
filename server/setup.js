@@ -31,11 +31,6 @@ function copy(from, to, overwrite = true) {
 
 const packageJSON = require(`${setupRoot}/package.json`);
 const octommentsVersion = packageJSON.version;
-const headers = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers':
-    'X-Requested-With, Access-Control-Allow-Origin, X-HTTP-Method-Override, Content-Type, Cache-Control, Authorization, Accept',
-};
 const nowJSON = {
   name,
   version: 2,
@@ -47,14 +42,12 @@ const nowJSON = {
     {
       src: '/octomments/issue',
       dest: '/api/issue.js',
-      headers,
     },
     {
       src: '/octomments/token',
       dest: '/api/token.js',
-      headers,
     },
-    { src: '/assets/(.*)', dest: 'assets/$1', headers },
+    { src: '/assets/(.*)', dest: 'assets/$1' },
     {
       src: '/(.*)',
       dest: 'api/noop.js',

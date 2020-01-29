@@ -1,6 +1,6 @@
 {
   "name": "octomments-renderer",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "description": "The default renderer for Octomments",
   "main": "build/octomments-renderer.js",
   "scripts": {
