@@ -1,4 +1,6 @@
-assets
+assets/*.json
+assets/*.jpg
+assets/page.css
 page
 .eslintrc
 now.json

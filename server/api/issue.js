@@ -1,11 +1,16 @@
 /* eslint-disable no-buffer-constructor, import/no-dynamic-require */
 const { parse } = require('url');
 const { json } = require('micro');
-const { error, success, requestGraphQL, getUser } = require('./utils');
+const corsMultipleAllowOrigin = require('micro-cors-multiple-allow-origin');
+const {
+  error,
+  success,
+  requestGraphQL,
+  getUser,
+  getConfig,
+} = require('./utils');
 
-const config = require(process.env.NODE_ENV === 'development'
-  ? './config.local.json'
-  : './config.json');
+const config = getConfig();
 
 const ISSUE_FIELDS = (filter = 'first: 100') => `
 id
@@ -147,67 +152,76 @@ async function createComment(number, body, token) {
   return getIssueByNumber(number, 'last:1');
 }
 
-module.exports = async (req, res) => {
-  // ------------------------------------------------------------------------
-  // creating new issue or a comment
-  if (req.method === 'POST') {
-    const data = await json(req);
+module.exports = corsMultipleAllowOrigin({ origin: config.origins })(
+  async (req, res) => {
+    // ------------------------------------------------------------------------
+    // creating new issue or a comment
+    if (req.method === 'POST') {
+      const data = await json(req);
 
-    // adding a comment
-    if (data && data.comment === true) {
-      if (!data.body || !data.token || !data.number) {
-        return error(res, new Error('Missing or wrong data.'), 400);
+      // adding a comment
+      if (data && data.comment === true) {
+        if (!data.body || !data.token || !data.number) {
+          return error(res, new Error('Missing or wrong data.'), 400);
+        }
+        try {
+          await getUser(data.token);
+        } catch (err) {
+          return error(res, err, 401);
+        }
+        try {
+          const updatedIssue = await createComment(
+            data.number,
+            data.body,
+            data.token
+          );
+          return success(res, { issue: updatedIssue }, 201);
+        } catch (err) {
+          return error(res, err, 500);
+        }
       }
+
+      // adding new issue
+      if (data.password !== config.password) {
+        return error(res, new Error('Wrong password!'), 403);
+      }
+
       try {
-        await getUser(data.token);
+        if (!data.body || !data.title) {
+          return error(res, new Error('Missing or wrong data.'), 400);
+        }
+        const newIssue = await createIssue(data.title, data.body);
+        return success(res, { issue: newIssue }, 201);
       } catch (err) {
-        return error(res, err, 401);
-      }
-      try {
-        const updatedIssue = await createComment(
-          data.number,
-          data.body,
-          data.token
+        console.log(err);
+        return error(
+          res,
+          new Error(`Error getting issue with id="${data.id}".`)
         );
-        return success(res, { issue: updatedIssue }, 201);
-      } catch (err) {
-        return error(res, err, 500);
       }
     }
 
-    // adding new issue
-    if (data.password !== config.password) {
-      return error(res, new Error('Wrong password!'), 403);
+    if (req.method === 'OPTIONS') {
+      return success(res, { hey: 'there' }, 201);
+    }
+
+    // ------------------------------------------------------------------------
+    // getting issue
+    const { query } = parse(req.url, true);
+    const { number } = query;
+
+    // getting single issue
+    if (!number) {
+      return error(res, new Error(`Missing "number".`), 400);
     }
 
     try {
-      if (!data.body || !data.title) {
-        return error(res, new Error('Missing or wrong data.'), 400);
-      }
-      const newIssue = await createIssue(data.title, data.body);
-      return success(res, { issue: newIssue }, 201);
+      const issue = await getIssueByNumber(number);
+
+      return success(res, { issue }, issue !== null ? 200 : 404);
     } catch (err) {
       console.log(err);
-      return error(res, new Error(`Error getting issue with id="${data.id}".`));
+      return error(res, err, 500);
     }
   }
-
-  // ------------------------------------------------------------------------
-  // getting issue
-  const { query } = parse(req.url, true);
-  const { number } = query;
-
-  // getting single issue
-  if (!number) {
-    return error(res, new Error(`Missing "number".`), 400);
-  }
-
-  try {
-    const issue = await getIssueByNumber(number);
-
-    return success(res, { issue }, issue !== null ? 200 : 404);
-  } catch (err) {
-    console.log(err);
-    return error(res, err, 500);
-  }
-};
+);

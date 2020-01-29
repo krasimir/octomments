@@ -1,12 +1,11 @@
 /* eslint-disable camelcase, import/no-dynamic-require  */
 const { parse } = require('url');
 const request = require('superagent');
-const { error, success, getUser } = require('./utils');
+const corsMultipleAllowOrigin = require('micro-cors-multiple-allow-origin');
+const { error, success, getUser, getConfig } = require('./utils');
 
 const TOKEN_ENDPOINT = 'https://github.com/login/oauth/access_token';
-const config = require(process.env.NODE_ENV === 'development'
-  ? './config.local.json'
-  : './config.json');
+const config = getConfig();
 
 const getToken = async code => {
   const response = await request.post(TOKEN_ENDPOINT).send({
@@ -28,30 +27,38 @@ const getToken = async code => {
   }
 };
 
-module.exports = async (req, res) => {
-  const { query } = parse(req.url, true);
-  const { code, redirect_url } = query;
+module.exports = corsMultipleAllowOrigin({ origin: config.origins })(
+  async (req, res) => {
+    const { query } = parse(req.url, true);
+    const { code, redirect_url } = query;
 
-  // login
-  if (!code) {
-    const params = [
-      `client_id=${config.github.id}`,
-      `redirect_uri=${`${redirect_url}`}`,
-      `scope=public_repo`,
-    ];
-    res.writeHead(301, {
-      Location: `https://github.com/login/oauth/authorize?${params.join('&')}`,
-    });
-    return res.end();
-  }
+    if (req.method === 'OPTIONS') {
+      return success(res, { hey: 'there' }, 201);
+    }
 
-  // getting the token out of code param
-  try {
-    const token = await getToken(code);
-    const user = await getUser(token);
-    return success(res, { token, ...user }, 200);
-  } catch (err) {
-    console.error(err);
-    return error(res, err, 403);
+    // login
+    if (!code) {
+      const params = [
+        `client_id=${config.github.id}`,
+        `redirect_uri=${`${redirect_url}`}`,
+        `scope=public_repo`,
+      ];
+      res.writeHead(301, {
+        Location: `https://github.com/login/oauth/authorize?${params.join(
+          '&'
+        )}`,
+      });
+      return res.end();
+    }
+
+    // getting the token out of code param
+    try {
+      const token = await getToken(code);
+      const user = await getUser(token);
+      return success(res, { token, ...user }, 200);
+    } catch (err) {
+      console.error(err);
+      return error(res, err, 403);
+    }
   }
-};
+);

@@ -1,3 +1,4 @@
+/* eslint-disable global-require, import/no-dynamic-require */
 const request = require('superagent');
 
 const ENDPOINT = 'https://api.github.com/graphql';
@@ -43,4 +44,9 @@ export async function getUser(token) {
     };
   }
   throw new Error('Not able to make the request to third party.');
+}
+export function getConfig() {
+  return require(process.env.NODE_ENV === 'development'
+    ? './config.local.json'
+    : './config.json');
 }

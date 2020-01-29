@@ -1,16 +1,16 @@
 {
   "name": "octomments-server",
-  "version": "0.2.4",
+  "version": "0.2.7",
   "description": "",
-  "main": "octomments.js",
+  "main": "./setup.js",
   "scripts": {
-    "dev": "now dev",
-    "release": "now --prod"
+    "dev": "now dev"
   },
   "author": "Krasimir Tsonev",
   "license": "MIT",
   "dependencies": {
     "micro": "9.3.4",
+    "micro-cors-multiple-allow-origin": "1.0.1",
     "superagent": "5.2.1"
   },
   "devDependencies": {
@@ -26,5 +26,8 @@
     "eslint-plugin-react": "7.18.0",
     "eslint-plugin-react-hooks": "1.7.0",
     "prettier": "1.19.1"
+  },
+  "bin": {
+    "octomments-server": "./setup.js"
   }
 }

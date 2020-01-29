@@ -1076,15 +1076,22 @@ loose-envify@^1.4.0:
   dependencies:
     js-tokens "^3.0.0 || ^4.0.0"
 
-marked@0.8.0:
-  version "0.8.0"
-  resolved "https://registry.yarnpkg.com/marked/-/marked-0.8.0.tgz#ec5c0c9b93878dc52dd54be8d0e524097bd81a99"
-  integrity sha512-MyUe+T/Pw4TZufHkzAfDj6HarCBWia2y27/bhuYkTaiUnfDYFnCP3KUN+9oM7Wi6JA2rymtVYbQu3spE0GCmxQ==
-
 methods@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
   integrity sha1-VSmk1nZUE07cxSZmVoNbD4Ua/O4=
+
+micro-cors-multiple-allow-origin@1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/micro-cors-multiple-allow-origin/-/micro-cors-multiple-allow-origin-1.0.1.tgz#3a83d4cda225a0b292ff56d98aab6c1bf08bd549"
+  integrity sha512-d+UQs/F3xSu8ZOOX0M3ItDlRkzIbfwrD9UUBsJyKiXfwDkFLo3de6izt2xbUZwsJea77VVQYPAz/zQTY+XIBwg==
+  dependencies:
+    micro-cors "^0.1.0"
+
+micro-cors@^0.1.0:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/micro-cors/-/micro-cors-0.1.1.tgz#af7a480182c114ffd1ada84ad9dffc52bb4f4054"
+  integrity sha512-6WqIahA5sbQR1Gjexp1VuWGFDKbZZleJb/gy1khNGk18a6iN1FdTcr3Q8twaxkV5H94RjxIBjirYbWCehpMBFw==
 
 micro@9.3.4:
   version "9.3.4"

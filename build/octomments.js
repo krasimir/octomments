@@ -159,7 +159,7 @@
     }
   }
 
-  function getIssueComments(api) {
+  function getIssueComments(api, p) {
     var notify = api.notify,
         options = api.options,
         error = api.error;
@@ -190,12 +190,12 @@
             };
             notify(COMMENTS_LOADED, newComments, null);
           })["catch"](function (err) {
-            console.err(err);
+            console.error(err);
             error(new Error("Error parsing the API response"), 3);
           });
         }
       })["catch"](function (err) {
-        console.err(err);
+        console.error(err);
         error(commentsError, 2);
       });
     }
@@ -255,14 +255,14 @@
             };
             notify(COMMENTS_LOADED, newComments, pagination);
           })["catch"](function (err) {
-            console.err(err);
+            console.error(err);
             error(commentsError, 2);
           });
         }
       });
     }
 
-    getIssueCommentsV3();
+    getIssueCommentsV3(p);
   }
 
   function addComment(api, text) {
@@ -386,7 +386,7 @@
     };
 
     api.page = function (index) {
-      getIssueComments(api);
+      getIssueComments(api, index);
     };
 
     api.generateNewCommentURL = function () {

@@ -45,28 +45,40 @@
 
   function Comments($container, octomments) {
     var api = {};
-    var state = 'idle';
+    var $moreCommentsLink;
+    var arr = [];
 
     api.loading = function () {
-      state = 'loading';
-      empty($container);
-      createEl('small', 'loading', $container, 'Loading comments ...');
+      if (arr.length === 0) {
+        empty($container);
+        createEl('div', 'summary', $container, "\n      <div>Loading comments ...</div>\n        <div>\n          <a href=\"https://octomments.now.sh/\" target=\"_blank\">\n            ".concat(GITHUB(14), "\n          </a>\n        </div>"));
+      } else {
+        $moreCommentsLink.innerHTML = "\n        <div></div>\n        <div class=\"".concat(PREFIX, "more-comments-loading\"><small>loading ...</small></div>\n      ");
+      }
     };
 
     api.noComments = function () {
-      state = 'idle';
       empty($container);
     };
 
-    api.data = function (data, pagination) {
-      if (state === 'loading') {
-        state = 'data';
-        empty($container);
-      }
+    api.newComment = function (newComments) {
+      api.data(newComments);
+    };
 
-      data.forEach(function (comment) {
+    api.data = function (data, pagination) {
+      arr = arr.concat(data);
+      empty($container);
+      createEl('div', 'summary', $container, "\n        <div id=\"".concat(PREFIX, "num-of-comments\">").concat(arr.length, " comment").concat(arr.length !== 1 ? 's' : '', "</div>\n        <div>\n          <a href=\"https://octomments.now.sh/\" target=\"_blank\">\n            ").concat(GITHUB(14), "\n          </a>\n        </div>\n      "));
+      arr.forEach(function (comment) {
         createEl('div', 'comment', $container, "\n          <div class=\"".concat(PREFIX, "comment_left\">\n            <img src=\"").concat(comment.author.avatarUrl, "\" />\n          </div>\n          <div class=\"").concat(PREFIX, "comment_right\">\n            <div class=\"").concat(PREFIX, "comment_heading\">\n              <strong>").concat(comment.author.login, "</strong>\n              <small> ~ ").concat(formatDate(comment.updatedAt), "</small>\n              <a href=\"").concat(comment.url, "\" target=\"_blank\" class=\"").concat(PREFIX, "right\">").concat(GITHUB(16), "</a>\n            </div>\n            <div class=\"").concat(PREFIX, "comment_body\">\n              ").concat(comment.body, "\n            </div>\n          </div>\n        "));
       });
+
+      if (pagination && pagination.next) {
+        $moreCommentsLink = createEl('div', "comment ".concat(PREFIX, "more-comments"), $container, "\n          <div></div>\n          <div>\n            <a href=\"javascript:void(0);\" id=\"".concat(PREFIX, "more-comments-link\">\n              <small>... load more comments</small>\n            </a>\n          </div>\n        "));
+        onClick("#".concat(PREFIX, "more-comments-link"), function () {
+          octomments.page(pagination.next.page);
+        });
+      }
     };
 
     function showError(str) {
@@ -91,15 +103,16 @@
 
   function NewComment($container, octomments) {
     var api = {};
+    $container.style.display = 'none';
 
     api.loading = function () {
       empty($container);
-      createEl('small', 'loading', $container, 'Loading user ...');
+      createEl('small', 'comment', $container, "\n      <div></div>\n      <div class=\"".concat(PREFIX, "loading-user\"><small>Loading user ...</small></div>\n      "));
     };
 
     api.noUser = function (url) {
       empty($container);
-      createEl('div', 'loading', $container, "<a href=\"".concat(url, "\" class=\"as-button\">\u270D\uFE0F Post a comment</a>"));
+      createEl('div', 'tar', $container, "<a href=\"".concat(url, "\" class=\"").concat(PREFIX, "as-button\">&#x271A; new comment</a>"));
     };
 
     api.form = function () {
@@ -148,6 +161,9 @@
         onClick("#".concat(PREFIX, "user_login"), octomments.initUser);
       }
     });
+    octomments.on(octomments.COMMENTS_LOADED, function () {
+      $container.style.display = 'block';
+    });
     return api;
   }
 
@@ -173,7 +189,7 @@
       button.innerHTML = 'Posting your comment ...';
     }).on(octomments.COMMENT_SAVED, function (newComments) {
       newComment.form();
-      comments.data(newComments);
+      comments.newComment(newComments);
     });
   }
 
