@@ -81,7 +81,15 @@ Octomments is highly customizable. It's built of three separate modules:
 * [Renderer](./renderer/README.md) - the renderer hooks to the core client and renders ui.
 * [Server](./server/README.md) - two [Zeit NOW](https://zeit.co/docs) lambdas that help with the authorization and listing fallback. They are already deployed and working at [ocs.now.sh/](https://ocs.now.sh/)
 
-[ocs.min.js](https://unpkg.com/octomments/build/ocs.min.js) file is a bundle that contains the core client and the renderer. Together with [ocs-ui.min.css](https://unpkg.com/octomments/build/ocs-ui.min.css) you have all you need to start using the library.
+[ocs.min.js](https://unpkg.com/octomments/build/ocs.min.js) file is a bundle that contains the core client and the renderer. Together with [ocs-ui.min.css](https://unpkg.com/octomments/build/ocs-ui.min.css) you have all you need to start using the library. Here is a list of all the files:
+
+* [ocs-core.js](https://unpkg.com/octomments/build/ocs-core.js) - core client
+* [ocs-core.min.js](https://unpkg.com/octomments/build/ocs-core.min.js) - core client (minified)
+* [ocs-ui.js](https://unpkg.com/octomments/build/ocs-ui.js) - renderer
+* [ocs-ui.min.js](https://unpkg.com/octomments/build/ocs-ui.min.js) - renderer (minified)
+* [ocs-ui.css](https://unpkg.com/octomments/build/ocs-ui.css) - renderer CSS
+* [ocs-ui.min.css](https://unpkg.com/octomments/build/ocs-ui.min.css) - renderer CSS (minified)
+* [ocs.min.js](https://unpkg.com/octomments/build/ocs.min.js) - core client + renderer bundle (minified)
 
 ## Development locally
 
