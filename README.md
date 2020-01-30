@@ -14,6 +14,7 @@
   - [Adding new comment](#adding-new-comment)
 - [Assets](#assets)
 - [Development locally](#development-locally)
+- [FAQ](#faq)
 
 ## What is Octomments
 
@@ -71,15 +72,9 @@ Your users need to be authenticated in order to post new comments. The library o
 
 Octomments is highly customizable. It's built of three separate modules:
 
-* Core client - it provides the basic logic for listing and commenting. It only exposes public methods and dispatches events. It is NOT dealing with UI.
-* Renderer - the renderer hooks to the core client and renders ui.
-* Server - two [Zeit NOW](https://zeit.co/docs) lambdas that help with the authorization and listing fallback. They are already deployed and working at [ocs.now.sh/](https://ocs.now.sh/)
-
-**Full documentation**
-
-* [Core client](./client/README.md)
-* [Renderer](./renderer/README.md)
-* [Server](./server/README.md)
+* [Core client](./client/README.md) - it provides the basic logic for listing and commenting. It only exposes public methods and dispatches events. It is NOT dealing with UI.
+* [Renderer](./renderer/README.md) - the renderer hooks to the core client and renders ui.
+* [Server](./server/README.md) - two [Zeit NOW](https://zeit.co/docs) lambdas that help with the authorization and listing fallback. They are already deployed and working at [ocs.now.sh/](https://ocs.now.sh/)
 
 ## Development locally
 
@@ -89,3 +84,25 @@ Octomments is highly customizable. It's built of three separate modules:
 ```
 
 _For the Octomments server you will need to create `server/api/config.local.json` file. Use `server/api/config.example.json` as a template and check the [Server](./server/README.md) documentation to understand what is what._
+
+## FAQ
+
+**Is Octomments creating the GitHub issues for me**
+
+Nope. This is not happening automatically. You have two options. Either you create the issues manually or you run your own Octomments server. The server offers a protected endpoint that creates new issues.
+
+**What is bare minimum to get Octomments on my page anyway?**
+
+The [How to use it](#how-to-use-it) section above explains it well. You have to include two files on your page, pick a DOM element as a placeholder and run a few lines of JavaScript in a `<script>` tag.
+
+**Can I use Octomments in my React/Vue/Angular/Svelt/<framework name here>**
+
+Yes. There is [octomments](https://www.npmjs.com/package/octomments) npm module. You it as a starting point and build the UI on top of it.
+
+**I don't like the UI. Can I make my own**
+
+Sure you can. Use the [core client](./client/README.md) as a base and build on top of it.
+
+**I want my own GitHub App**
+
+You have to spin up your own [Octomments server](./server/README.md).
