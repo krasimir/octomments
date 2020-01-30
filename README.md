@@ -6,11 +6,21 @@
 
 <p align="center"><a href="https://ocs.now.sh/">https://ocs.now.sh/</a>.</p>
 
+- [What is Octomments](#what-is-octomments)
+- [Why](#why)
+- [How to use it](#how-to-use-it)
+- [How it works](#how-it-works)
+  - [Listing of comments](#listing-of-comments)
+  - [Adding new comment](#adding-new-comment)
+- [Assets](#assets)
+- [Development locally](#development-locally)
+
 ## What is Octomments
 
 * ~6KB (gzip) JavaScript/CSS solution that creates a comment widget.
-* It uses GitHub issues as a place to store the comments.
+* It uses GitHub issue as a host for the comments.
 * Allows your visitors to log in, stay on your page and comment from there.
+* Highly [customizable](#assets).
 
 ## Why
 
@@ -51,17 +61,25 @@ Then you drop the following JavaScript:
 
 ### Listing of comments
 
-When Octomments initializes it requests GitHub's v3 API based on the passed options. It gets the issue behind the provided number and its comments. The requests to GitHub's API have certain [limits](https://developer.github.com/v3/#rate-limiting). If the user is not logged in he can make up to 60 requests for one hour. That's of course not so much and if the user reaches the limit a request to [ocs.now.sh/](https://ocs.now.sh/) is made. The API there is authorized to make up to 5000 requests per hour. Of course these 5000 requests are shared between all the people using the library. If you think that your users will hit the 60 requests limit I strongly recommend to spin up your own Octomments server. More about that [here](./server/README.md).
+When Octomments initializes it requests GitHub's v3 API based on the passed options. It gets the issue behind the provided number and its comments. The requests to GitHub's API have certain [limits](https://developer.github.com/v3/#rate-limiting). If the user is not logged in he/she can make up to 60 requests per hour. That's of course not so much and if the user reaches the limit a request to [ocs.now.sh/](https://ocs.now.sh/) is made. The API there is authorized to make up to 5000 requests per hour. Of course these 5000 requests are shared between all the people using the library. If you think that your users will hit the 60 requests limit I strongly recommend to spin up your own Octomments server. More about that [here](./server/README.md). It's not a big deal.
 
 ### Adding new comment
 
-Your users need to be authenticated in order to post new comments to GitHub issues. The library offers a free endpoint for that available at [ocs.now.sh/](https://ocs.now.sh/). You don't have to create your own GitHub app and provide client id or secret. The only one case where you may actually want to do this is when you want your company logo/name to appear when the user is asked for authorization at GitHub. In this case you have to spin up your own Octomments server.  More about that [here](./server/README.md).
+Your users need to be authenticated in order to post new comments. The library offers a free endpoint which helps getting a GitHub auth token. There is an endpoint at [ocs.now.sh](https://ocs.now.sh/) which implements GitHub's [web application](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow) authentication mechanism. You don't have to create your own GitHub app and provide client id or a secret. The only one case where you may actually want to do this is when you want your company logo/name to appear when the user is asked to grant access. In this case you have to spin up your own Octomments server. Again more about that [here](./server/README.md).
 
-## Full documentation
+## Assets
 
-* [Client](./client/README.md)
-* [Server](./server/README.md)
+Octomments is highly customizable. It's built of three separate modules:
+
+* Core client - it provides the basic logic for listing and commenting. It only exposes public methods and dispatches events. It is NOT dealing with UI.
+* Renderer - the renderer hooks to the core client and renders ui.
+* Server - two [Zeit NOW](https://zeit.co/docs) lambdas that help with the authorization and listing fallback. They are already deployed and working at [ocs.now.sh/](https://ocs.now.sh/)
+
+**Full documentation**
+
+* [Core client](./client/README.md)
 * [Renderer](./renderer/README.md)
+* [Server](./server/README.md)
 
 ## Development locally
 
