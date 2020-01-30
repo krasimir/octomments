@@ -1,16 +1,104 @@
 # Octomments client
 
-## Events
+The core functionality of Octomments.
 
-### `ERROR`
+- [Octomments client](#octomments-client)
+  - [Setup](#setup)
+  - [Usage](#usage)
+  - [Options](#options)
+  - [Methods](#methods)
+    - [api.init()](#apiinit)
+    - [api.add(text)](#apiaddtext)
+    - [api.on(<event>, <callback>)](#apionevent-callback)
+  - [event | callback params | description](#event--callback-params--description)
+    - [api.logout(refresh = true)](#apilogoutrefresh--true)
+    - [api.page(index)](#apipageindex)
+    - [api.generateNewCommentURL()](#apigeneratenewcommenturl)
+    - [api.off()](#apioff)
+  - [Errors](#errors)
 
+## Setup
+
+```html
+<script src="https://unpkg.com/octomments/build/ocs.min.js"></script>
 ```
-.on(ERROR, (error, type) => {
-  // ...
-});
+
+or 
+
+```html
+> npm i octomments
 ```
 
-`error` is a JavaScript error while the `type` is one of the following:
+## Usage
+
+```js
+import Octomments from 'octomments';
+
+function Renderer(api, container) {
+  // api.on
+}
+
+const octomments = Octomments({
+  github: {
+    owner: '<username>',
+    repo: '<repo name>',
+  },
+  number: <issue number>,
+  renderer: [OctommentsRenderer, '<selector>']
+}).init();
+```
+
+## Options
+
+* `github` (required) - object containing `owner` (GitHub username) and `repo` (GitHub repository) fields.
+* `number` (required) - the number of an existing in the repository issue
+* `renderer` (required) - an array where the first element is a renderer function and the second one is a valid DOM element selector.
+* `debug` (optional) - a boolean. If `true` the library will print each of the dispatched events.
+* `endpoints` (optional) - an object with `issue` and `token` fields. The values of these fields are valid URLs pointing to [Octomments server](../server) endpoints. You'll probably never need to setup those unless you deploy your own server. The already existing one is at `ocs.now.sh`.
+
+## Methods
+
+### api.init()
+
+Initiates the comments and user fetching.
+
+### api.add(text)
+
+Adding of a new comment where `text` is the markdown of the comment.
+
+### api.on(<event>, <callback>)
+
+* `event` - on of the following ERROR, COMMENTS_LOADING, COMMENTS_LOADED, COMMENT_SAVING, COMMENT_SAVED, USER_LOADING, USER_NONE, USER_LOADED.
+* `callback` - function called when the event is triggered
+
+event | callback params | description
+---
+ERROR | <ul><li>error</li><li>type of error</li></ul> | when there is an error. Check the [errors](#errors) section below to see the possible types.
+COMMENTS_LOADING | <ul><li>none</li></ul> | when the loading of the comments begins
+COMMENTS_LOADED | <ul><li>comments</li><li>pagination info</li></ul> | when the comments are loaded
+COMMENT_SAVING | <ul><li>none</li></ul> | when the user submits a comment
+COMMENT_SAVED | <ul><li>an array with one item - the new comment</li></ul> | when the comment is saved successfully
+USER_LOADING | <ul><li>none</li></ul> | when the library initiates a request for the user's data
+USER_NONE | <ul><li>user login url</li></ul> | when there is no user logged in. Use this event to render a "log in" link.
+USER_LOADED | <ul><li>user's data</li></ul> | when the data of the user is fetched successfully
+
+### api.logout(refresh = true)
+
+Removes the user's data from the localStorage and (potentially) refreshes the page.
+
+### api.page(index)
+
+Initiating a new comments fetching for a page with specific index.
+
+### api.generateNewCommentURL()
+
+Returns a URL which you can use to make the user log in. It will redirect the user to `ocs.now.sh`/GitHub for authentication and then back to your page.
+
+### api.off()
+
+Removes all the listeners added with `api.on`.
+
+## Errors
 
 * 1 - comments: issue doesn't exists
 * 2 - comments: other problem loading the issue
