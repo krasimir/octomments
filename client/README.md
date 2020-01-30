@@ -44,8 +44,10 @@ const octomments = Octomments({
     repo: '<repo name>',
   },
   number: <issue number>,
-  renderer: [OctommentsRenderer, '<selector>']
-}).init();
+  renderer: [Renderer, '<selector>']
+});
+
+octomments.init();
 ```
 
 ## Options
