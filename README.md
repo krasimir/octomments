@@ -4,7 +4,7 @@
 
 <h3 align="center">Using GitHub issues as a comment plugin.</h3>
 
-<p align="center"><a href="https://ocs.now.sh/">https://ocs.now.sh/</a>.</p>
+<p align="center"><a href="https://ocs.now.sh/">https://ocs.now.sh</a></p>
 
 - [What is Octomments](#what-is-octomments)
 - [Why](#why)
