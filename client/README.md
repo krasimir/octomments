@@ -34,7 +34,9 @@ or
 import Octomments from 'octomments';
 
 function Renderer(api, container) {
-  // api.on
+  api.on(Octomments.USER_NONE, (loginURL) => {
+    console.log(loginURL);
+  });
 }
 
 const octomments = Octomments({
