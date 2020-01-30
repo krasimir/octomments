@@ -2,7 +2,6 @@
 const request = require('superagent');
 
 const ENDPOINT = 'https://api.github.com/graphql';
-const USER_ENDPOINT = 'https://api.github.com/user';
 
 export function error(res, error, statusCode = 500) {
   res.setHeader('Content-Type', 'application/json');
@@ -25,23 +24,6 @@ export async function requestGraphQL(query, token) {
 
   if (response.ok) {
     return response.body;
-  }
-  throw new Error('Not able to make the request to third party.');
-}
-export async function getUser(token) {
-  const response = await request
-    .get(USER_ENDPOINT)
-    .set('Authorization', `token ${token}`)
-    .set('User-Agent', 'Node');
-
-  if (response.ok) {
-    // console.log(JSON.stringify(response.body, null, 2));
-    return {
-      login: response.body.login,
-      avatarUrl: response.body.avatar_url,
-      url: response.body.html_url,
-      name: response.body.name,
-    };
   }
   throw new Error('Not able to make the request to third party.');
 }

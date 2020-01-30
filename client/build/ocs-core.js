@@ -70,17 +70,14 @@
     return decodeURIComponent(results[2].replace(/\+/g, ' '));
   }
   function cleanUpURL(url) {
-    ['code', 'error', 'error_description', 'error_uri'].forEach(function (a) {
+    ['code', 'error', 'error_description', 'error_uri', 't'].forEach(function (a) {
       url = url.replace(new RegExp("[?&]".concat(a, "=[^&]+")), '');
     });
     return url;
   }
   function getAuthenticationURL(tokenURL) {
     var url = cleanUpURL(window.location.href);
-    return "".concat(tokenURL, "?redirect_url=").concat(encodeURI(url));
-  }
-  function getNewCommentURL(number, github) {
-    return "https://github.com/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "#new_comment_field");
+    return "".concat(tokenURL, "?redirect=").concat(encodeURI(url));
   }
   function parseLinkHeader(link) {
     var entries = link.split(',');
@@ -128,10 +125,8 @@
     var notify = api.notify,
         options = api.options,
         error = api.error;
-    var endpoints = options.endpoints,
-        gotoComments = options.gotoComments;
+    var gotoComments = options.gotoComments;
     gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
-    notify(USER_LOADING);
     var newCommentURL = api.generateNewCommentURL();
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
 
@@ -147,18 +142,31 @@
         console.error(err);
         error(new Error('Corrupted data in local storage.'), 5);
       }
-    } else if (endpoints && getParameterByName('code')) {
-      fetch("".concat(endpoints.token, "?code=").concat(getParameterByName('code'))).then(function (response, err) {
+    } else if (getParameterByName('t')) {
+      var token = getParameterByName('t');
+      api.user = {
+        token: token
+      };
+      notify(USER_LOADING);
+      fetch("https://api.github.com/user", {
+        headers: api.getHeaders()
+      }).then(function (response, err) {
         if (err || !response.ok) {
           if (err) console.error(err);
           clearCurrentURL();
-          error(new Error('Problem getting access token.'), 6);
+          error(new Error("Problem getting user's info."), 6);
         } else {
           response.json().then(function (data) {
+            api.user = {
+              token: api.user.token,
+              login: data.login,
+              avatarUrl: data.avatar_url,
+              url: data.html_url,
+              name: data.name
+            };
             clearCurrentURL();
-            api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
-            api.user = data;
-            notify(USER_LOADED, data);
+            api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(api.user));
+            notify(USER_LOADED, api.user);
           })["catch"](function (err) {
             console.error(err);
             error(new Error('Problem parsing access token response.'), 7);
@@ -185,16 +193,31 @@
     var doesntExist = new Error("Issue #".concat(number, " doesn't exists."));
     notify(COMMENTS_LOADING);
 
-    function getIssueCommentsV4() {
-      fetch("".concat(endpoints.issue, "?number=").concat(number)).then(function (response, err) {
+    function catchErrorHandler(err) {
+      console.error(err);
+      error(commentsError, 2);
+    }
+
+    function processResponse(callback) {
+      return function (response, err) {
         if (err) {
           error(commentsError, 2);
         } else if (!response.ok) {
           if (response.status === 404) {
-            error(doesntExist, 1);
-          } else {
-            error(commentsError, 2);
+            return error(doesntExist, 1);
           }
+
+          callback(response);
+        } else {
+          callback(response);
+        }
+      };
+    }
+
+    function getIssueCommentsV4() {
+      fetch("".concat(endpoints.issue, "?number=").concat(number)).then(processResponse(function (response) {
+        if (!response.ok) {
+          error(commentsError, 2);
         } else {
           response.json().then(function (data) {
             var newComments = data.issue.comments;
@@ -208,25 +231,21 @@
             error(new Error("Error parsing the API response"), 3);
           });
         }
-      })["catch"](function (err) {
-        console.error(err);
-        error(commentsError, 2);
-      });
+      }))["catch"](catchErrorHandler);
     }
 
     function getIssueCommentsV3() {
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
       var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page);
       fetch(url, {
-        headers: {
-          Accept: 'application/vnd.github.v3.html+json'
-        }
-      }).then(function (response, err) {
-        if (err) {
-          error(commentsError, 2);
-        } else if (!response.ok) {
-          if (response.status === 404) {
-            return error(doesntExist, 1);
+        headers: api.getHeaders()
+      }).then(processResponse(function (response) {
+        if (!response.ok) {
+          if (response.status === 401) {
+            api.logout(false);
+            notify(USER_NONE);
+            getIssueCommentsV3(page);
+            return;
           }
 
           if (response.status === 403) {
@@ -238,27 +257,24 @@
           }
 
           return error(commentsError, 2);
-        } else {
-          var link = response.headers.get('Link');
-          var pagination = null;
-
-          if (link) {
-            pagination = parseLinkHeader(link);
-          }
-
-          response.json().then(function (data) {
-            var newComments = data.map(normalizeComment);
-            api.data = {
-              comments: api.data.comments.concat(newComments),
-              pagination: pagination
-            };
-            notify(COMMENTS_LOADED, newComments, pagination);
-          })["catch"](function (err) {
-            console.error(err);
-            error(commentsError, 2);
-          });
         }
-      });
+
+        var link = response.headers.get('Link');
+        var pagination = null;
+
+        if (link) {
+          pagination = parseLinkHeader(link);
+        }
+
+        response.json().then(function (data) {
+          var newComments = data.map(normalizeComment);
+          api.data = {
+            comments: api.data.comments.concat(newComments),
+            pagination: pagination
+          };
+          notify(COMMENTS_LOADED, newComments, pagination);
+        })["catch"](catchErrorHandler);
+      }));
     }
 
     getIssueCommentsV3(p);
@@ -273,11 +289,6 @@
     var failed = new Error('Adding a new comment failed.');
     notify(COMMENT_SAVING);
     var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments");
-    var headers = {
-      'Content-Type': 'application/json',
-      Authorization: "token ".concat(api.user.token),
-      Accept: 'application/vnd.github.v3.html+json'
-    };
 
     function catchErrorHandler(err) {
       console.error(err);
@@ -316,7 +327,7 @@
 
     fetch(url, {
       method: 'POST',
-      headers: headers,
+      headers: api.getHeaders(),
       body: JSON.stringify({
         body: text
       })
@@ -329,6 +340,18 @@
     if (!options) throw new Error('Octomments options required.');
     if (!options.github || !options.github.owner || !options.github.repo) throw new Error('`options.github` is missing or incomplete.');
     if (!options.number) throw new Error('`options.number` is missing.');
+
+    if (!options.endpoints) {
+      options.endpoints = {
+        issue: 'https://ocs.now.sh/octomments/issue',
+        token: 'https://ocs.now.sh/octomments/token'
+      };
+    }
+
+    if (options.debug) {
+      console.log('Octomments started with: ', JSON.stringify(options, null, 2));
+    }
+
     var listeners = {};
     var api = {
       user: null,
@@ -338,7 +361,7 @@
       },
       options: options,
       LS: Storage()
-    }; // internal
+    };
 
     api.error = function (e, meta) {
       api.notify(ERROR, e, meta);
@@ -361,8 +384,7 @@
 
     api.initComments = function () {
       return getIssueComments(api);
-    }; // public
-
+    };
 
     api.logout = function () {
       var refresh = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : true;
@@ -400,7 +422,19 @@
     };
 
     api.generateNewCommentURL = function () {
-      return options.endpoints ? getAuthenticationURL(options.endpoints.token) : options.github ? getNewCommentURL(options.number, options.github) : null;
+      return getAuthenticationURL(options.endpoints.token);
+    };
+
+    api.getHeaders = function () {
+      var headers = {};
+      headers['Content-Type'] = 'application/json';
+      headers.Accept = 'application/vnd.github.v3.html+json';
+
+      if (api.user && api.user.token) {
+        headers.Authorization = "token ".concat(api.user.token);
+      }
+
+      return headers;
     };
 
     CONSTANTS.forEach(function (c) {

@@ -1088,7 +1088,7 @@ micro-cors-multiple-allow-origin@1.0.1:
   dependencies:
     micro-cors "^0.1.0"
 
-micro-cors@^0.1.0:
+micro-cors@0.1.1, micro-cors@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/micro-cors/-/micro-cors-0.1.1.tgz#af7a480182c114ffd1ada84ad9dffc52bb4f4054"
   integrity sha512-6WqIahA5sbQR1Gjexp1VuWGFDKbZZleJb/gy1khNGk18a6iN1FdTcr3Q8twaxkV5H94RjxIBjirYbWCehpMBFw==

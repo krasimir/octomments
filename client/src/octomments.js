@@ -4,13 +4,22 @@ import getUser from './ops/getUser';
 import getIssueComments from './ops/getIssueComments';
 import addComment from './ops/addComment';
 import { CONSTANTS, OCTOMMENTS_USER, ERROR } from './constants';
-import { getAuthenticationURL, getNewCommentURL } from './utils';
+import { getAuthenticationURL } from './utils';
 
 function Octomments(options) {
   if (!options) throw new Error('Octomments options required.');
   if (!options.github || !options.github.owner || !options.github.repo)
     throw new Error('`options.github` is missing or incomplete.');
   if (!options.number) throw new Error('`options.number` is missing.');
+  if (!options.endpoints) {
+    options.endpoints = {
+      issue: 'https://ocs.now.sh/octomments/issue',
+      token: 'https://ocs.now.sh/octomments/token',
+    };
+  }
+  if (options.debug) {
+    console.log('Octomments started with: ', JSON.stringify(options, null, 2));
+  }
 
   const listeners = {};
   const api = {
@@ -20,7 +29,6 @@ function Octomments(options) {
     LS: Storage(),
   };
 
-  // internal
   api.error = (e, meta) => {
     api.notify(ERROR, e, meta);
   };
@@ -30,7 +38,6 @@ function Octomments(options) {
   };
   api.initUser = () => getUser(api);
   api.initComments = () => getIssueComments(api);
-  // public
   api.logout = function(refresh = true) {
     api.user = null;
     api.LS.removeItem(OCTOMMENTS_USER);
@@ -59,11 +66,16 @@ function Octomments(options) {
     getIssueComments(api, index);
   };
   api.generateNewCommentURL = () =>
-    options.endpoints
-      ? getAuthenticationURL(options.endpoints.token)
-      : options.github
-      ? getNewCommentURL(options.number, options.github)
-      : null;
+    getAuthenticationURL(options.endpoints.token);
+  api.getHeaders = () => {
+    const headers = {};
+    headers['Content-Type'] = 'application/json';
+    headers.Accept = 'application/vnd.github.v3.html+json';
+    if (api.user && api.user.token) {
+      headers.Authorization = `token ${api.user.token}`;
+    }
+    return headers;
+  };
 
   CONSTANTS.forEach(c => (api[c] = c));
 

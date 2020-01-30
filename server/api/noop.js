@@ -1,12 +1,9 @@
-const corsMultipleAllowOrigin = require('micro-cors-multiple-allow-origin');
-const { getConfig } = require('./utils');
+const microCors = require('micro-cors');
 
-const config = getConfig();
+const cors = microCors({ allowMethods: ['GET', 'POST'] });
 
-module.exports = corsMultipleAllowOrigin({ origin: config.origins })(
-  async (req, res) => {
-    res.setHeader('Content-Type', 'application/json');
-    res.statusCode = 200;
-    res.end(JSON.stringify({ noop: 'ok' }));
-  }
-);
+module.exports = cors(async (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.statusCode = 200;
+  res.end(JSON.stringify({ noop: 'ok' }));
+});

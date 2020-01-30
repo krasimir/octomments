@@ -9,10 +9,9 @@ import {
 
 export default function getUser(api) {
   const { notify, options, error } = api;
-  let { endpoints, gotoComments } = options;
+  let { gotoComments } = options;
 
   gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
-  notify(USER_LOADING);
 
   const newCommentURL = api.generateNewCommentURL();
   const lsUser = api.LS.getItem(OCTOMMENTS_USER);
@@ -31,21 +30,30 @@ export default function getUser(api) {
       console.error(err);
       error(new Error('Corrupted data in local storage.'), 5);
     }
-  } else if (endpoints && getParameterByName('code')) {
-    fetch(`${endpoints.token}?code=${getParameterByName('code')}`)
+  } else if (getParameterByName('t')) {
+    const token = getParameterByName('t');
+    api.user = { token };
+    notify(USER_LOADING);
+    fetch(`https://api.github.com/user`, { headers: api.getHeaders() })
       .then((response, err) => {
         if (err || !response.ok) {
           if (err) console.error(err);
           clearCurrentURL();
-          error(new Error('Problem getting access token.'), 6);
+          error(new Error("Problem getting user's info."), 6);
         } else {
           response
             .json()
             .then(data => {
+              api.user = {
+                token: api.user.token,
+                login: data.login,
+                avatarUrl: data.avatar_url,
+                url: data.html_url,
+                name: data.name,
+              };
               clearCurrentURL();
-              api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(data));
-              api.user = data;
-              notify(USER_LOADED, data);
+              api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(api.user));
+              notify(USER_LOADED, api.user);
             })
             .catch(err => {
               console.error(err);

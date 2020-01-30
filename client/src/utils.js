@@ -10,7 +10,7 @@ export function getParameterByName(name, url) {
 }
 
 export function cleanUpURL(url) {
-  ['code', 'error', 'error_description', 'error_uri'].forEach(a => {
+  ['code', 'error', 'error_description', 'error_uri', 't'].forEach(a => {
     url = url.replace(new RegExp(`[\?&]${a}=[^&]+`), '');
   });
   return url;
@@ -18,11 +18,7 @@ export function cleanUpURL(url) {
 
 export function getAuthenticationURL(tokenURL) {
   const url = cleanUpURL(window.location.href);
-  return `${tokenURL}?redirect_url=${encodeURI(url)}`;
-}
-
-export function getNewCommentURL(number, github) {
-  return `https://github.com/${github.owner}/${github.repo}/issues/${number}#new_comment_field`;
+  return `${tokenURL}?redirect=${encodeURI(url)}`;
 }
 
 export function parseLinkHeader(link) {

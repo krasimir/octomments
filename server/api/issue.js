@@ -1,14 +1,10 @@
 /* eslint-disable no-buffer-constructor, import/no-dynamic-require */
 const { parse } = require('url');
 const { json } = require('micro');
-const corsMultipleAllowOrigin = require('micro-cors-multiple-allow-origin');
-const {
-  error,
-  success,
-  requestGraphQL,
-  getUser,
-  getConfig,
-} = require('./utils');
+const microCors = require('micro-cors');
+const { error, success, requestGraphQL, getConfig } = require('./utils');
+
+const cors = microCors({ allowMethods: ['GET', 'POST'] });
 
 const config = getConfig();
 
@@ -125,103 +121,47 @@ async function createIssue(title, body) {
   return rawNewIssue.data.createIssue.issue;
 }
 
-async function createComment(number, body, token) {
-  const issue = await getIssueByNumber(number);
-  const res = await requestGraphQL(
-    `
-    mutation {
-      addComment(input: {
-        subjectId: "${issue.id}"
-        body: ${JSON.stringify(body)}
-      }) {
-        commentEdge {
-          node {
-            id
-            updatedAt
-            createdAt
-          }
-        }
-      }
-    }
-  `,
-    token
-  );
-  if (res.errors) {
-    throw new Error(res.errors.map(e => e.message).join(', '));
-  }
-  return getIssueByNumber(number, 'last:1');
-}
+module.exports = cors(async (req, res) => {
+  // ------------------------------------------------------------------------
+  // creating new issue
+  if (req.method === 'POST') {
+    const data = await json(req);
 
-module.exports = corsMultipleAllowOrigin({ origin: config.origins })(
-  async (req, res) => {
-    // ------------------------------------------------------------------------
-    // creating new issue or a comment
-    if (req.method === 'POST') {
-      const data = await json(req);
-
-      // adding a comment
-      if (data && data.comment === true) {
-        if (!data.body || !data.token || !data.number) {
-          return error(res, new Error('Missing or wrong data.'), 400);
-        }
-        try {
-          await getUser(data.token);
-        } catch (err) {
-          return error(res, err, 401);
-        }
-        try {
-          const updatedIssue = await createComment(
-            data.number,
-            data.body,
-            data.token
-          );
-          return success(res, { issue: updatedIssue }, 201);
-        } catch (err) {
-          return error(res, err, 500);
-        }
-      }
-
-      // adding new issue
-      if (data.password !== config.password) {
-        return error(res, new Error('Wrong password!'), 403);
-      }
-
-      try {
-        if (!data.body || !data.title) {
-          return error(res, new Error('Missing or wrong data.'), 400);
-        }
-        const newIssue = await createIssue(data.title, data.body);
-        return success(res, { issue: newIssue }, 201);
-      } catch (err) {
-        console.log(err);
-        return error(
-          res,
-          new Error(`Error getting issue with id="${data.id}".`)
-        );
-      }
-    }
-
-    if (req.method === 'OPTIONS') {
-      return success(res, { hey: 'there' }, 201);
-    }
-
-    // ------------------------------------------------------------------------
-    // getting issue
-    const { query } = parse(req.url, true);
-    const { number } = query;
-
-    // getting single issue
-    if (!number) {
-      return error(res, new Error(`Missing "number".`), 400);
+    if (data.password !== config.password) {
+      return error(res, new Error('Wrong password!'), 403);
     }
 
     try {
-      const issue = await getIssueByNumber(number);
-
-      return success(res, { issue }, issue !== null ? 200 : 404);
+      if (!data.body || !data.title) {
+        return error(res, new Error('Missing or wrong data.'), 400);
+      }
+      const newIssue = await createIssue(data.title, data.body);
+      return success(res, { issue: newIssue }, 201);
     } catch (err) {
       console.log(err);
-      return error(res, err, 500);
+      return error(res, new Error(`Error getting issue with id="${data.id}".`));
     }
   }
-);
+
+  if (req.method === 'OPTIONS') {
+    return success(res, { hey: 'there' }, 201);
+  }
+
+  // ------------------------------------------------------------------------
+  // getting issue
+  const { query } = parse(req.url, true);
+  const { number } = query;
+
+  if (!number) {
+    return error(res, new Error(`Missing issue "number".`), 400);
+  }
+
+  try {
+    const issue = await getIssueByNumber(number);
+
+    return success(res, { issue }, issue !== null ? 200 : 404);
+  } catch (err) {
+    console.log(err);
+    return error(res, err, 500);
+  }
+});

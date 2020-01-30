@@ -29,10 +29,6 @@ Because I wanted:
 
 ## Development locally
 
-You need to run four processes in four different terminals. Sorry! That's because we have:
-* core library building and watching (`client` folder)
-* renderer library building and watching (`renderer` folder)
-* octomments server for authentication and GitHub v4 API support (`server` folder)
-* a small static server that loads a page containing Octomments integration (`_local` folder)
+`> sh ./scripts/dev.sh`
 
-In each of the folders run `yarn install` and then `yarn dev`. All the bits except `server` will work without any other changes. For the server however you need to create `server/api/config.local.json` file. Use `server/api/config.example.json` as a template and check the [Server](./server/README.md) documentation to understand what is what.
+_For the Octomments server you will need to create `server/api/config.local.json` file. Use `server/api/config.example.json` as a template and check the [Server](./server/README.md) documentation to understand what is what._

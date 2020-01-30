@@ -9,11 +9,6 @@ export default function addComment(api, text) {
   notify(COMMENT_SAVING);
 
   const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments`;
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `token ${api.user.token}`,
-    Accept: 'application/vnd.github.v3.html+json',
-  };
 
   function catchErrorHandler(err) {
     console.error(err);
@@ -48,7 +43,11 @@ export default function addComment(api, text) {
     };
   }
 
-  fetch(url, { method: 'POST', headers, body: JSON.stringify({ body: text }) })
+  fetch(url, {
+    method: 'POST',
+    headers: api.getHeaders(),
+    body: JSON.stringify({ body: text }),
+  })
     .then(
       processResponse(item => {
         notify(COMMENT_SAVED, [normalizeComment(item)]);
