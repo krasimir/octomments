@@ -9,7 +9,7 @@ The core functionality of Octomments.
   - [Methods](#methods)
     - [api.init()](#apiinit)
     - [api.add(text)](#apiaddtext)
-    - [api.on(<event>, <callback>)](#apionevent-callback)
+    - [api.on(event, callback)](#apionevent-callback)
     - [api.logout(refresh = true)](#apilogoutrefresh--true)
     - [api.page(index)](#apipageindex)
     - [api.generateNewCommentURL()](#apigeneratenewcommenturl)
@@ -69,7 +69,7 @@ Initiates the comments and user fetching.
 
 Adding of a new comment where `text` is the markdown of the comment.
 
-### api.on(<event>, <callback>)
+### api.on(event, callback)
 
 * `event` - on of the following ERROR, COMMENTS_LOADING, COMMENTS_LOADED, COMMENT_SAVING, COMMENT_SAVED, USER_LOADING, USER_NONE, USER_LOADED.
 * `callback` - function called when the event is triggered
