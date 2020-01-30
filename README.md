@@ -29,6 +29,9 @@ Because I wanted:
 
 ## Development locally
 
-`> sh ./scripts/dev.sh`
+```
+> yarn
+> yarn dev
+```
 
 _For the Octomments server you will need to create `server/api/config.local.json` file. Use `server/api/config.example.json` as a template and check the [Server](./server/README.md) documentation to understand what is what._
