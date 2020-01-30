@@ -6,22 +6,48 @@
 
 <p align="center"><a href="https://ocs.now.sh/">https://ocs.now.sh/</a>.</p>
 
-## What
+## What is Octomments
 
-* Client-side JavaScript library for fetching issue and adding comments to it. It also covers the GitHub [web authentication flow](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow) so the users will be able to post a comment directly from within your page.
-* Server side JavaScript lambda functions for authentication and issue management.
-* There is a default [renderer](./renderer/README.md) for the UI but you are free to build your own solution. All the events and errors are exposed.
+* ~6KB (gzip) JavaScript/CSS solution that creates a comment widget.
+* It uses GitHub issues as a place to store the comments.
+* Allows your visitors to log in, stay on your page and comment from there.
 
 ## Why
 
 Because I wanted:
 
-* Just two features - listing and posting of comments
-* Speed
-* No ads
-* No database
+* Minimalistic comments for [my blog](https://krasimirtsonev.com/blog) 🗣️
+* Speed 🏇
+* No ads 🚫
+* No database 🗃️
 
-## Documentation
+## How to use it
+
+There are two files that you need to include on your page:
+
+```html
+<link rel="stylesheet" href="https://unpkg.com/octomments/build/ocs-ui.min.css" />
+<script src="https://unpkg.com/octomments/build/ocs.min.js"></script>
+```
+
+Then you drop the following JavaScript:
+
+```html
+Octomments({
+  github: {
+    owner: '<username>',
+    repo: '<repo name>',
+  },
+  number: <issue number>,
+  renderer: [OctommentsRenderer, '<selector>']
+}).init();
+```
+
+`<username>` is your GitHub's username. `<repo name>` is the repo where you are going to host your comments. `<issue number>` is the number of the GitHub issue that this particular page is associated with. And `<selector>` is a valid DOM element selector (the place where Octomments will load the widget).
+
+## How it works
+
+## Full documentation
 
 * [Client](./client/README.md)
 * [Server](./server/README.md)
