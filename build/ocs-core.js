@@ -79,21 +79,6 @@
     var url = cleanUpURL(window.location.href);
     return "".concat(tokenURL, "?redirect=").concat(encodeURI(url));
   }
-  function parseLinkHeader(link) {
-    var entries = link.split(',');
-    var links = {};
-
-    for (var i in entries) {
-      var entry = entries[i];
-      var l = {};
-      l.name = entry.match(/rel=\"([^\"]*)/)[1];
-      l.url = entry.match(/<([^>]*)/)[1];
-      l.page = parseInt(entry.match(/page=(\d+).*$/)[1], 10);
-      links[l.name] = l;
-    }
-
-    return links;
-  }
   function normalizeComment(item) {
     return {
       id: item.id,
@@ -188,7 +173,6 @@
     var endpoints = options.endpoints,
         number = options.number,
         github = options.github;
-    var withServer = !!endpoints;
     var commentsError = new Error("Error getting comments for issue #".concat(number, "."));
     var doesntExist = new Error("Issue #".concat(number, " doesn't exists."));
     notify(COMMENTS_LOADING);
@@ -215,7 +199,7 @@
     }
 
     function getIssueCommentsV4() {
-      fetch("".concat(endpoints.issue, "?number=").concat(number)).then(processResponse(function (response) {
+      fetch("".concat(endpoints.issue, "?owner=").concat(github.owner, "&repo=").concat(github.repo, "&number=").concat(number)).then(processResponse(function (response) {
         if (!response.ok) {
           error(commentsError, 2);
         } else {
@@ -234,50 +218,8 @@
       }))["catch"](catchErrorHandler);
     }
 
-    function getIssueCommentsV3() {
-      var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page);
-      fetch(url, {
-        headers: api.getHeaders()
-      }).then(processResponse(function (response) {
-        if (!response.ok) {
-          if (response.status === 401) {
-            api.logout(false);
-            notify(USER_NONE);
-            getIssueCommentsV3(page);
-            return;
-          }
 
-          if (response.status === 403) {
-            if (withServer) {
-              return getIssueCommentsV4();
-            }
-
-            return error(new Error("Rate limit exceeded."), 4);
-          }
-
-          return error(commentsError, 2);
-        }
-
-        var link = response.headers.get('Link');
-        var pagination = null;
-
-        if (link) {
-          pagination = parseLinkHeader(link);
-        }
-
-        response.json().then(function (data) {
-          var newComments = data.map(normalizeComment);
-          api.data = {
-            comments: api.data.comments.concat(newComments),
-            pagination: pagination
-          };
-          notify(COMMENTS_LOADED, newComments, pagination);
-        })["catch"](catchErrorHandler);
-      }));
-    }
-
-    getIssueCommentsV3(p);
+    getIssueCommentsV4();
   }
 
   function addComment(api, text) {
@@ -348,6 +290,10 @@
       };
     }
 
+    if (options.debug) {
+      console.log('Octomments started with: ', JSON.stringify(options, null, 2));
+    }
+
     var listeners = {};
     var api = {
       user: null,
@@ -414,7 +360,7 @@
     };
 
     api.page = function (index) {
-      getIssueComments(api, index);
+      getIssueComments(api);
     };
 
     api.generateNewCommentURL = function () {

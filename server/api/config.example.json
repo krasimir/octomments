@@ -1,8 +1,6 @@
 {
   "password": "...",
   "github": {
-    "owner": "...",
-    "repo": "...",
     "token": "...",
     "id": "...",
     "secret": "..."

@@ -27,7 +27,7 @@ comments(${filter}) {
   }
 }`;
 
-function normalizeIssue(entry) {
+function normalizeIssue(owner, repo, entry) {
   return {
     id: entry.id,
     number: entry.number,
@@ -40,7 +40,7 @@ function normalizeIssue(entry) {
             const id = buff.toString('utf-8').replace(/(.*):IssueComment/, '');
             return {
               id,
-              url: `https://github.com/${config.github.owner}/${config.github.repo}/issues/${entry.number}#issuecomment-${id}`,
+              url: `https://github.com/${owner}/${repo}/issues/${entry.number}#issuecomment-${id}`,
               author: comment.author,
               body: comment.bodyHTML,
               createdAt: comment.createdAt,
@@ -60,15 +60,13 @@ function normalizeRepo(graphQLResponse) {
   };
 }
 
-async function getIssueByNumber(number, filter) {
+async function getIssueByNumber(owner, repo, number) {
   const res = await requestGraphQL(
     `
     {
-      repository(owner: "${config.github.owner}", name: "${
-      config.github.repo
-    }") {
+      repository(owner: "${owner}", name: "${repo}") {
         issue(number: ${number}) {
-          ${ISSUE_FIELDS(filter)}
+          ${ISSUE_FIELDS()}
         }
       }
     }
@@ -78,15 +76,15 @@ async function getIssueByNumber(number, filter) {
   if (res && res.errors) {
     throw new Error(res.errors.map(e => e.message).join(', '));
   }
-  return normalizeIssue(res.data.repository.issue);
+  return normalizeIssue(owner, repo, res.data.repository.issue);
 }
 
-async function getRepo() {
+async function getRepo(owner, repo) {
   return normalizeRepo(
     await requestGraphQL(
       `
     {
-      search(query: "repo:${config.github.owner}/${config.github.repo}", type: REPOSITORY, first: 1) {
+      search(query: "repo:${owner}/${repo}", type: REPOSITORY, first: 1) {
         nodes {
           ... on Repository {
             id
@@ -100,13 +98,13 @@ async function getRepo() {
   );
 }
 
-async function createIssue(title, body) {
-  const repo = await getRepo();
+async function createIssue(owner, repo, title, body) {
+  const { id } = await getRepo(owner, repo);
   const rawNewIssue = await requestGraphQL(
     `
     mutation {
       createIssue(input: {
-        repositoryId: "${repo.id}"
+        repositoryId: "${id}"
         title: ${JSON.stringify(title)}
         body: ${JSON.stringify(body)}
       }) {
@@ -132,10 +130,15 @@ module.exports = cors(async (req, res) => {
     }
 
     try {
-      if (!data.body || !data.title) {
+      if (!data.body || !data.title || !data.owner || !data.repo) {
         return error(res, new Error('Missing or wrong data.'), 400);
       }
-      const newIssue = await createIssue(data.title, data.body);
+      const newIssue = await createIssue(
+        data.owner,
+        data.repo,
+        data.title,
+        data.body
+      );
       return success(res, { issue: newIssue }, 201);
     } catch (err) {
       console.log(err);
@@ -150,14 +153,20 @@ module.exports = cors(async (req, res) => {
   // ------------------------------------------------------------------------
   // getting issue
   const { query } = parse(req.url, true);
-  const { number } = query;
+  const { owner, repo, number } = query;
 
+  if (!owner) {
+    return error(res, new Error(`Missing owner.`), 400);
+  }
+  if (!repo) {
+    return error(res, new Error(`Missing repo.`), 400);
+  }
   if (!number) {
     return error(res, new Error(`Missing issue "number".`), 400);
   }
 
   try {
-    const issue = await getIssueByNumber(number);
+    const issue = await getIssueByNumber(owner, repo, number);
 
     return success(res, { issue }, issue !== null ? 200 : 404);
   } catch (err) {

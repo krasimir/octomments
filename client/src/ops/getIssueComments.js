@@ -32,7 +32,9 @@ export default function getIssueComments(api, p) {
   }
 
   function getIssueCommentsV4() {
-    fetch(`${endpoints.issue}?number=${number}`)
+    fetch(
+      `${endpoints.issue}?owner=${github.owner}&repo=${github.repo}&number=${number}`
+    )
       .then(
         processResponse(response => {
           if (!response.ok) {
@@ -97,5 +99,6 @@ export default function getIssueComments(api, p) {
     );
   }
 
-  getIssueCommentsV3(p);
+  // getIssueCommentsV3(p);
+  getIssueCommentsV4();
 }
