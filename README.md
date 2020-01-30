@@ -15,11 +15,11 @@
 - [Assets](#assets)
 - [Development locally](#development-locally)
 - [FAQ](#faq)
-  - [Is Octomments creating the GitHub issues for me###](#is-octomments-creating-the-github-issues-for-me)
-  - [What is bare minimum to get Octomments on my page anyway?###](#what-is-bare-minimum-to-get-octomments-on-my-page-anyway)
-  - [Can I use Octomments in my React/Vue/Angular/Svelt/<framework name here>###](#can-i-use-octomments-in-my-reactvueangularsveltframework-name-here)
-  - [I don't like the UI. Can I make my own###](#i-dont-like-the-ui-can-i-make-my-own)
-  - [I want my own GitHub App###](#i-want-my-own-github-app)
+  - [Is Octomments creating the GitHub issues for me?](#is-octomments-creating-the-github-issues-for-me)
+  - [What is the bare minimum to get Octomments on my page anyway?](#what-is-the-bare-minimum-to-get-octomments-on-my-page-anyway)
+  - [Can I use Octomments in my React/Vue/Angular/Svelt/<framework name here>?](#can-i-use-octomments-in-my-reactvueangularsveltframework-name-here)
+  - [I don't like the UI. Can I make my own?](#i-dont-like-the-ui-can-i-make-my-own)
+  - [I want my own GitHub App when the user is authenticating?](#i-want-my-own-github-app-when-the-user-is-authenticating)
 
 ## What is Octomments
 
@@ -92,22 +92,22 @@ _For the Octomments server you will need to create `server/api/config.local.json
 
 ## FAQ
 
-### Is Octomments creating the GitHub issues for me### 
+### Is Octomments creating the GitHub issues for me?
 
 Nope. This is not happening automatically. You have two options. Either you create the issues manually or you run your own Octomments server. The server offers a protected endpoint that creates new issues.
 
-### What is bare minimum to get Octomments on my page anyway?### 
+### What is the bare minimum to get Octomments on my page anyway?
 
 The [How to use it](#how-to-use-it) section above explains it well. You have to include two files on your page, pick a DOM element as a placeholder and run a few lines of JavaScript in a `<script>` tag.
 
-### Can I use Octomments in my React/Vue/Angular/Svelt/<framework name here>### 
+### Can I use Octomments in my React/Vue/Angular/Svelt/<framework name here>?
 
 Yes. There is [octomments](https://www.npmjs.com/package/octomments) npm module. You it as a starting point and build the UI on top of it.
 
-### I don't like the UI. Can I make my own### 
+### I don't like the UI. Can I make my own?
 
 Sure you can. Use the [core client](./client/README.md) as a base and build on top of it.
 
-### I want my own GitHub App### 
+### I want my own GitHub App when the user is authenticating?
 
 You have to spin up your own [Octomments server](./server/README.md).
