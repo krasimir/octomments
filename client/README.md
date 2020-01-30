@@ -10,7 +10,6 @@ The core functionality of Octomments.
     - [api.init()](#apiinit)
     - [api.add(text)](#apiaddtext)
     - [api.on(<event>, <callback>)](#apionevent-callback)
-  - [event | callback params | description](#event--callback-params--description)
     - [api.logout(refresh = true)](#apilogoutrefresh--true)
     - [api.page(index)](#apipageindex)
     - [api.generateNewCommentURL()](#apigeneratenewcommenturl)
@@ -73,16 +72,16 @@ Adding of a new comment where `text` is the markdown of the comment.
 * `event` - on of the following ERROR, COMMENTS_LOADING, COMMENTS_LOADED, COMMENT_SAVING, COMMENT_SAVED, USER_LOADING, USER_NONE, USER_LOADED.
 * `callback` - function called when the event is triggered
 
-event | callback params | description
----
-ERROR | <ul><li>error</li><li>type of error</li></ul> | when there is an error. Check the [errors](#errors) section below to see the possible types.
-COMMENTS_LOADING | <ul><li>none</li></ul> | when the loading of the comments begins
-COMMENTS_LOADED | <ul><li>comments</li><li>pagination info</li></ul> | when the comments are loaded
-COMMENT_SAVING | <ul><li>none</li></ul> | when the user submits a comment
-COMMENT_SAVED | <ul><li>an array with one item - the new comment</li></ul> | when the comment is saved successfully
-USER_LOADING | <ul><li>none</li></ul> | when the library initiates a request for the user's data
-USER_NONE | <ul><li>user login url</li></ul> | when there is no user logged in. Use this event to render a "log in" link.
-USER_LOADED | <ul><li>user's data</li></ul> | when the data of the user is fetched successfully
+|event | callback params | description
+|---|---|---
+|ERROR | <ul><li>error</li><li>type of error</li></ul> | when there is an error. Check the [errors](#errors) section below to see the possible types.
+|COMMENTS_LOADING | <ul><li>none</li></ul> | when the loading of the comments begins
+|COMMENTS_LOADED | <ul><li>comments</li><li>pagination info</li></ul> | when the comments are loaded
+|COMMENT_SAVING | <ul><li>none</li></ul> | when the user submits a comment
+|COMMENT_SAVED | <ul><li>an array with one item - the new comment</li></ul> | when the comment is saved successfully
+|USER_LOADING | <ul><li>none</li></ul> | when the library initiates a request for the user's data
+|USER_NONE | <ul><li>user login url</li></ul> | when there is no user logged in. Use this event to render a "log in" link.
+|USER_LOADED | <ul><li>user's data</li></ul> | when the data of the user is fetched successfully
 
 ### api.logout(refresh = true)
 
