@@ -81,6 +81,8 @@ Octomments is highly customizable. It's built of three separate modules:
 * [Renderer](./renderer/README.md) - the renderer hooks to the core client and renders ui.
 * [Server](./server/README.md) - two [Zeit NOW](https://zeit.co/docs) lambdas that help with the authorization and listing fallback. They are already deployed and working at [ocs.now.sh/](https://ocs.now.sh/)
 
+[ocs.min.js](https://unpkg.com/octomments/build/ocs.min.js) file is a bundle that contains the core client and the renderer. Together with [ocs-ui.min.css](https://unpkg.com/octomments/build/ocs-ui.min.css) you have all you need to start using the library.
+
 ## Development locally
 
 ```
