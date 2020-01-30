@@ -2,13 +2,11 @@
   "name": "octomments",
   "version": 2,
   "builds": [
-    { "src": "assets/*.*", "use": "@now/static" },
     { "src": "api/*.*", "use": "@now/node" }
   ],
   "routes": [
     { "src": "/octomments/issue", "dest": "/api/issue.js" },
     { "src": "/octomments/token", "dest": "/api/token.js" },
-    { "src": "/assets/(.*)", "dest": "assets/$1" },
     { "src": "/(.*)", "dest": "api/noop.js" }
   ]
 }

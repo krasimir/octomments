@@ -1,15 +1,14 @@
 #!/bin/sh
 
 node ./scripts/bumping-versions.js
-cd client
+
+cd renderer
 yarn build
 npm publish
-cd ../renderer
+
+cd ../client
 yarn build
 npm publish
-cd ../
-cat ./build/ocs-core.min.js ./build/ocs-ui.min.js > build/ocs.min.js
-rm -rf ./server/assets/*
-cp ./build/* ./server/assets
-cd ./server
+
+cd ../server
 npm publish

@@ -1,12 +1,12 @@
 {
   "name": "octomments",
-  "version": "0.3.1",
+  "version": "0.3.6",
   "description": "A small library that offers GitHub issues as comments for your site/blog",
   "main": "build/ocs-core.js",
   "scripts": {
     "clean": "rm -rf ./build/*",
     "dev": "rollup -w -c",
-    "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-core.min.js -- build/ocs-core.js && cp ./build/* ../build"
+    "build": "yarn clean && rollup -c && uglifyjs --compress --mangle --output build/ocs-core.min.js -- build/ocs-core.js && cp ../renderer/build/* ./build && cat ./build/ocs-core.min.js ./build/ocs-ui.min.js > build/ocs.min.js"
   },
   "repository": {
     "type": "git",

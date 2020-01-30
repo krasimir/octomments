@@ -34,10 +34,7 @@ const octommentsVersion = packageJSON.version;
 const nowJSON = {
   name,
   version: 2,
-  builds: [
-    { src: 'api/*.*', use: '@now/node' },
-    { src: 'assets/*.*', use: '@now/static' },
-  ],
+  builds: [{ src: 'api/*.*', use: '@now/node' }],
   routes: [
     {
       src: '/octomments/issue',
@@ -47,7 +44,6 @@ const nowJSON = {
       src: '/octomments/token',
       dest: '/api/token.js',
     },
-    { src: '/assets/(.*)', dest: 'assets/$1' },
     {
       src: '/(.*)',
       dest: 'api/noop.js',
@@ -100,23 +96,6 @@ if (
   console.log(`   └─ config.json (already exists)`);
 }
 
-// assets
-createFolder(`${projectRoot}/assets`);
-console.log(`└─ assets`);
-const assets = [
-  'assets/ocs-core.js',
-  'assets/ocs-core.min.js',
-  'assets/ocs-ui.css',
-  'assets/ocs-ui.js',
-  'assets/ocs-ui.min.css',
-  'assets/ocs-ui.min.js',
-  'assets/ocs.min.js',
-];
-assets.forEach(f => {
-  copy(`${setupRoot}/${f}`, `${projectRoot}/${f}`);
-  console.log(`   └─ ${f}`);
-});
-
 // report
 console.log('\n\nNext steps:\n');
 console.log(`1. Edit api/config.json`);
@@ -129,10 +108,6 @@ console.log(`3. Use the server`);
 console.log('endpoints');
 console.log(`└─ <url>/octomments/issue`);
 console.log(`└─ <url>/octomments/token`);
-console.log('assets');
-assets.forEach(asset => {
-  console.log(`└─ <url>/${asset}`);
-});
 
 console.log('\nMore info here https://github.com/krasimir/octomments');
 
