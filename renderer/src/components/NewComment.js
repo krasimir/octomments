@@ -98,6 +98,9 @@ export default function NewComment($container, octomments) {
       }, 100);
     }
   };
+  api.newCommentSaved = () => {
+    octomments.LS.removeItem(TEXT);
+  };
 
   function showError(str, clear = true, parent = $container) {
     if (clear) empty($container);

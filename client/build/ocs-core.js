@@ -55,7 +55,8 @@
 
     return {
       setItem: function setItem() {},
-      getITem: function getITem() {}
+      getITem: function getITem() {},
+      removeItem: function removeItem() {}
     };
   }
 

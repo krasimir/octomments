@@ -16,5 +16,6 @@ export default function Storage() {
   return {
     setItem() {},
     getITem() {},
+    removeItem() {},
   };
 }

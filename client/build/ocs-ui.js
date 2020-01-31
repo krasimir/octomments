@@ -177,6 +177,10 @@
       }
     };
 
+    api.newCommentSaved = function () {
+      octomments.LS.removeItem(TEXT);
+    };
+
     function showError(str) {
       var clear = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
       var parent = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : $container;
@@ -229,6 +233,7 @@
       textarea.disabled = true;
       button.innerHTML = 'Posting your comment ...';
     }).on(octomments.COMMENT_SAVED, function (newComments) {
+      newComment.newCommentSaved();
       newComment.form();
       comments.newComment(newComments);
     });

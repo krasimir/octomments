@@ -33,6 +33,7 @@ function OctommentsRenderer(octomments, containerSelector) {
       button.innerHTML = 'Posting your comment ...';
     })
     .on(octomments.COMMENT_SAVED, newComments => {
+      newComment.newCommentSaved();
       newComment.form();
       comments.newComment(newComments);
     });
