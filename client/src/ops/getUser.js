@@ -8,24 +8,17 @@ import {
 } from '../constants';
 
 export default function getUser(api) {
-  const { notify, options, error } = api;
-  let { gotoComments } = options;
-
-  gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
+  const { notify, error } = api;
 
   const newCommentURL = api.generateNewCommentURL();
   const lsUser = api.LS.getItem(OCTOMMENTS_USER);
   const clearCurrentURL = () =>
-    history.replaceState(
-      {},
-      document.title,
-      `${cleanUpURL(location.href)}${gotoComments ? '#O_new_comment' : ''}`
-    );
+    history.replaceState({}, document.title, cleanUpURL(location.href));
 
   if (lsUser) {
     try {
       api.user = JSON.parse(lsUser);
-      notify(USER_LOADED, api.user);
+      notify(USER_LOADED, api.user, false);
     } catch (err) {
       console.error(err);
       error(new Error('Corrupted data in local storage.'), 5);
@@ -53,7 +46,7 @@ export default function getUser(api) {
               };
               clearCurrentURL();
               api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(api.user));
-              notify(USER_LOADED, api.user);
+              notify(USER_LOADED, api.user, true);
             })
             .catch(err => {
               console.error(err);

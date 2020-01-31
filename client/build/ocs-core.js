@@ -123,21 +123,18 @@
   /* eslint-disable no-restricted-globals */
   function getUser(api) {
     var notify = api.notify,
-        options = api.options,
         error = api.error;
-    var gotoComments = options.gotoComments;
-    gotoComments = typeof gotoComments !== 'undefined' ? gotoComments : true;
     var newCommentURL = api.generateNewCommentURL();
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
 
     var clearCurrentURL = function clearCurrentURL() {
-      return history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#O_new_comment' : ''));
+      return history.replaceState({}, document.title, cleanUpURL(location.href));
     };
 
     if (lsUser) {
       try {
         api.user = JSON.parse(lsUser);
-        notify(USER_LOADED, api.user);
+        notify(USER_LOADED, api.user, false);
       } catch (err) {
         console.error(err);
         error(new Error('Corrupted data in local storage.'), 5);
@@ -166,7 +163,7 @@
             };
             clearCurrentURL();
             api.LS.setItem(OCTOMMENTS_USER, JSON.stringify(api.user));
-            notify(USER_LOADED, api.user);
+            notify(USER_LOADED, api.user, true);
           })["catch"](function (err) {
             console.error(err);
             error(new Error('Problem parsing access token response.'), 7);

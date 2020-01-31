@@ -153,7 +153,7 @@
       });
     };
 
-    api.form = function () {
+    api.form = function (_, focusTextArea) {
       var user = octomments.user;
 
       if (!user) {
@@ -168,6 +168,13 @@
       onClick("#".concat(PREFIX, "logout"), function () {
         octomments.logout();
       });
+
+      if (focusTextArea) {
+        setTimeout(function () {
+          console.log($("#".concat(PREFIX, "_textarea")));
+          $("#".concat(PREFIX, "_textarea")).focus();
+        }, 100);
+      }
     };
 
     function showError(str) {

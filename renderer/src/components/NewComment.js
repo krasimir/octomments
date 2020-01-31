@@ -64,7 +64,7 @@ export default function NewComment($container, octomments) {
       window.location.href = url;
     });
   };
-  api.form = () => {
+  api.form = (_, focusTextArea) => {
     const user = octomments.user;
     if (!user) {
       return api.loading();
@@ -91,6 +91,12 @@ export default function NewComment($container, octomments) {
     onClick(`#${PREFIX}logout`, () => {
       octomments.logout();
     });
+    if (focusTextArea) {
+      setTimeout(() => {
+        console.log($(`#${PREFIX}_textarea`));
+        $(`#${PREFIX}_textarea`).focus();
+      }, 100);
+    }
   };
 
   function showError(str, clear = true, parent = $container) {

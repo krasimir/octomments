@@ -85,7 +85,7 @@ Here is a table with all the possible events:
 |Octomments.COMMENT_SAVED | <ul><li>an array with one item - the new comment</li></ul> | when the comment is saved successfully
 |Octomments.USER_LOADING | <ul><li>none</li></ul> | when the library initiates a request for the user's data
 |Octomments.USER_NONE | <ul><li>user login url</li></ul> | when there is no user logged in. Use this event to render a "log in" link.
-|Octomments.USER_LOADED | <ul><li>user's data</li></ul> | when the data of the user is fetched successfully
+|Octomments.USER_LOADED | <ul><li>user's data</li><li>first time</li></ul> | when the data of the user is fetched successfully. The second parameter shows if the user is just logged in or his/her data is pulled from the local storage
 
 ### api.logout(refresh = true)
 
