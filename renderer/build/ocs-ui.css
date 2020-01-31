@@ -4,12 +4,6 @@
 .O_tar {
   text-align: right;
 }
-.O_root a {
-  color: #000;
-}
-.O_root a:hover {
-  color: blue;
-}
 .O_right {
   float: right;
 }

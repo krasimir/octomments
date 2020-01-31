@@ -96,6 +96,17 @@ if (
   console.log(`   └─ config.json (already exists)`);
 }
 
+const ignoring = [
+  'api/config.json',
+  'api/config.local.json',
+  'node_modules',
+  '*.log',
+];
+['.gitignore', '.npmignore'].forEach(file => {
+  write(`${projectRoot}/${file}`, ignoring.join('\n'));
+  console.log(`└─ ${file}`);
+});
+
 // report
 console.log('\n\nNext steps:\n');
 console.log(`1. Edit api/config.json`);
