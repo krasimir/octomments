@@ -55,7 +55,7 @@ export default function NewComment($container, octomments) {
           <a name="octomments-new-comment"></a>
           <div class="${PREFIX}avatar_placeholder"></div>
         </div>
-        <div class="${PREFIX}comment_right">
+        <div class="${PREFIX}comment_right" id="octomments-new-comment">
           <textarea id="${PREFIX}_textarea" placeholder="I think ..."></textarea>
           <button id="${PREFIX}_submit_comment">Log in and comment</button>
         </div>
@@ -80,7 +80,7 @@ export default function NewComment($container, octomments) {
           <a name="octomments-new-comment"></a>
           <img src="${user.avatarUrl}" />
         </div>
-        <div class="${PREFIX}comment_right">
+        <div class="${PREFIX}comment_right" id="octomments-new-comment">
           <textarea id="${PREFIX}_textarea" placeholder="I think ..."></textarea>
           <button id="${PREFIX}_submit_comment">Comment</button>
           <a href="javascript:void(0);" id="${PREFIX}logout" class="${PREFIX}right ${PREFIX}logout"><small>Log out</small></a>
