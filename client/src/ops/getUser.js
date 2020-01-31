@@ -19,9 +19,7 @@ export default function getUser(api) {
     history.replaceState(
       {},
       document.title,
-      `${cleanUpURL(location.href)}${
-        gotoComments ? '#octomments-new-comment' : ''
-      }`
+      `${cleanUpURL(location.href)}${gotoComments ? '#O_new_comment' : ''}`
     );
 
   if (lsUser) {

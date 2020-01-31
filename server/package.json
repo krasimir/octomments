@@ -1,6 +1,6 @@
 {
   "name": "octomments-server",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "description": "",
   "main": "./setup.js",
   "scripts": {

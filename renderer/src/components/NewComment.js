@@ -52,7 +52,6 @@ export default function NewComment($container, octomments) {
       $container,
       `
         <div class="${PREFIX}comment_left" id="${PREFIX}new_comment">
-          <a id="octomments-new-comment"></a>
           <div class="${PREFIX}avatar_placeholder"></div>
         </div>
         <div class="${PREFIX}comment_right">
@@ -77,7 +76,6 @@ export default function NewComment($container, octomments) {
       $container,
       `
         <div class="${PREFIX}comment_left" id="${PREFIX}new_comment">
-          <a id="octomments-new-comment"></a>
           <img src="${user.avatarUrl}" />
         </div>
         <div class="${PREFIX}comment_right">

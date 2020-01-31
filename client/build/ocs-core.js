@@ -131,7 +131,7 @@
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
 
     var clearCurrentURL = function clearCurrentURL() {
-      return history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#octomments-new-comment' : ''));
+      return history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#O_new_comment' : ''));
     };
 
     if (lsUser) {
