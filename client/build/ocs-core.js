@@ -79,6 +79,21 @@
     var url = cleanUpURL(window.location.href);
     return "".concat(tokenURL, "?redirect=").concat(encodeURI(url));
   }
+  function parseLinkHeader(link) {
+    var entries = link.split(',');
+    var links = {};
+
+    for (var i in entries) {
+      var entry = entries[i];
+      var l = {};
+      l.name = entry.match(/rel=\"([^\"]*)/)[1];
+      l.url = entry.match(/<([^>]*)/)[1];
+      l.page = parseInt(entry.match(/page=(\d+).*$/)[1], 10);
+      links[l.name] = l;
+    }
+
+    return links;
+  }
   function normalizeComment(item) {
     return {
       id: item.id,
@@ -116,7 +131,7 @@
     var lsUser = api.LS.getItem(OCTOMMENTS_USER);
 
     var clearCurrentURL = function clearCurrentURL() {
-      return history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#comments' : ''));
+      return history.replaceState({}, document.title, "".concat(cleanUpURL(location.href)).concat(gotoComments ? '#octomments-new-comment' : ''));
     };
 
     if (lsUser) {
@@ -173,6 +188,7 @@
     var endpoints = options.endpoints,
         number = options.number,
         github = options.github;
+    var withServer = !!endpoints;
     var commentsError = new Error("Error getting comments for issue #".concat(number, "."));
     var doesntExist = new Error("Issue #".concat(number, " doesn't exists."));
     notify(COMMENTS_LOADING);
@@ -218,8 +234,50 @@
       }))["catch"](catchErrorHandler);
     }
 
+    function getIssueCommentsV3() {
+      var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
+      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page);
+      fetch(url, {
+        headers: api.getHeaders()
+      }).then(processResponse(function (response) {
+        if (!response.ok) {
+          if (response.status === 401) {
+            api.logout(false);
+            notify(USER_NONE);
+            getIssueCommentsV3(page);
+            return;
+          }
 
-    getIssueCommentsV4();
+          if (response.status === 403) {
+            if (withServer) {
+              return getIssueCommentsV4();
+            }
+
+            return error(new Error("Rate limit exceeded."), 4);
+          }
+
+          return error(commentsError, 2);
+        }
+
+        var link = response.headers.get('Link');
+        var pagination = null;
+
+        if (link) {
+          pagination = parseLinkHeader(link);
+        }
+
+        response.json().then(function (data) {
+          var newComments = data.map(normalizeComment);
+          api.data = {
+            comments: api.data.comments.concat(newComments),
+            pagination: pagination
+          };
+          notify(COMMENTS_LOADED, newComments, pagination);
+        })["catch"](catchErrorHandler);
+      }));
+    }
+
+    getIssueCommentsV3(p); // getIssueCommentsV4();
   }
 
   function addComment(api, text) {
@@ -360,7 +418,7 @@
     };
 
     api.page = function (index) {
-      getIssueComments(api);
+      getIssueComments(api, index);
     };
 
     api.generateNewCommentURL = function () {

@@ -35,3 +35,11 @@ export function onClick(sel, callback) {
     console.warn(`Octomments: ${sel} element doesn't exists in the DOM`);
   }
 }
+export function onChange(sel, callback) {
+  const el = $(sel);
+  if (el) {
+    el.addEventListener('keyup', callback);
+  } else {
+    console.warn(`Octomments: ${sel} element doesn't exists in the DOM`);
+  }
+}

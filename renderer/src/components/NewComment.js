@@ -1,10 +1,36 @@
-import { createEl, empty, onClick, $ } from '../utils';
+import { createEl, empty, onClick, $, onChange } from '../utils';
 import { PREFIX } from '../constants';
+
+const TEXT = 'OCTOMMENTS_NEW_COMMENT_TEXT';
 
 export default function NewComment($container, octomments) {
   const api = {};
 
   $container.style.display = 'none';
+
+  function setupForm(onSubmit) {
+    const initialValue = octomments.LS.getItem(TEXT) || '';
+    const button = $(`#${PREFIX}_submit_comment`);
+    const textarea = $(`#${PREFIX}_textarea`);
+
+    onClick(`#${PREFIX}_submit_comment`, () => {
+      button.disabled = true;
+      onSubmit(textarea.value);
+    });
+    onChange(`#${PREFIX}_textarea`, e => {
+      if (e.target.value === '') {
+        button.disabled = true;
+      } else {
+        button.disabled = false;
+      }
+      octomments.LS.setItem(TEXT, e.target.value);
+    });
+    if (initialValue === '') {
+      button.disabled = true;
+    } else {
+      textarea.value = initialValue;
+    }
+  }
 
   api.loading = () => {
     empty($container);
@@ -22,10 +48,22 @@ export default function NewComment($container, octomments) {
     empty($container);
     createEl(
       'div',
-      'tar',
+      'comment',
       $container,
-      `<a href="${url}" class="${PREFIX}as-button">&#x271A; new comment</a>`
+      `
+        <div class="${PREFIX}comment_left" id="${PREFIX}new_comment">
+          <a name="#octomments-new-comment"></a>
+          <div class="${PREFIX}avatar_placeholder"></div>
+        </div>
+        <div class="${PREFIX}comment_right">
+          <textarea id="${PREFIX}_textarea" placeholder="I think ..."></textarea>
+          <button id="${PREFIX}_submit_comment">Log in and comment</button>
+        </div>
+      `
     );
+    setupForm(() => {
+      window.location.href = url;
+    });
   };
   api.form = () => {
     const user = octomments.user;
@@ -39,6 +77,7 @@ export default function NewComment($container, octomments) {
       $container,
       `
         <div class="${PREFIX}comment_left" id="${PREFIX}new_comment">
+          <a name="#octomments-new-comment"></a>
           <img src="${user.avatarUrl}" />
         </div>
         <div class="${PREFIX}comment_right">
@@ -46,13 +85,10 @@ export default function NewComment($container, octomments) {
           <button id="${PREFIX}_submit_comment">Comment</button>
           <a href="javascript:void(0);" id="${PREFIX}logout" class="${PREFIX}right ${PREFIX}logout"><small>Log out</small></a>
         </div>
-    `
+      `
     );
-    onClick(`#${PREFIX}_submit_comment`, () => {
-      const text = $(`#${PREFIX}_textarea`).value;
-      if (text !== '') {
-        octomments.add(text);
-      }
+    setupForm(text => {
+      octomments.add(text);
     });
     onClick(`#${PREFIX}logout`, () => {
       octomments.logout();

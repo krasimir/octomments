@@ -17,9 +17,13 @@
   column-gap: 1em;
   margin-top: 1em;
 }
-.O_comment_left img {
+.O_comment_left img, .O_avatar_placeholder {
   max-width: 100%;
   border-radius: 67% 33% 35% 65% / 38% 30% 70% 62%;
+}
+.O_avatar_placeholder {
+  height: 60px;
+  background: #c4c4c4;
 }
 .O_comment_right {
   padding: 0.6em 0 0 0;
@@ -157,7 +161,6 @@
   border-radius: 4px;
   padding: 0.6em 1em;
   font-size: 0.7em;
-  text-transform: uppercase;
   cursor: pointer;
   outline: none;
   background: #f7f7f7;
@@ -171,7 +174,8 @@
 }
 .O_new-comment button:disabled {
   background: #f7f7f7;
-  cursor: wait; 
+  opacity: 0.3;
+  cursor: default;
 }
 .O_logout {
   opacity: 0.3;

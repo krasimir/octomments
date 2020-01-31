@@ -99,6 +99,6 @@ export default function getIssueComments(api, p) {
     );
   }
 
-  // getIssueCommentsV3(p);
-  getIssueCommentsV4();
+  getIssueCommentsV3(p);
+  // getIssueCommentsV4();
 }

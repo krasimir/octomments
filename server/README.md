@@ -41,7 +41,7 @@ Open `api/config.json` and let's fill the placeholders.
 * `github.token` - create a personal token here [https://github.com/settings/tokens](https://github.com/settings/tokens) and grant only `public_repo` permission. This token is used when fetching a GitHub issue.
 * `github.id` and `github.secret` - those are client id and client secret of a GitHub Auth app. Create one here [https://github.com/settings/developers](https://github.com/settings/developers). Make sure to set a proper `Authorization callback URL`. That's the url of the site which will use your server.
 
-Note: `api/config.json` and `api/config.local.json` are gitignored. You SHOULD NOT share this files with third parties. Do not upload them in public places. Especially dangerous is to share your personal token.
+Note: `api/config.json` and `api/config.local.json` are gitignored. You SHOULD NOT share these files with third parties. Do not upload them in public places. Especially dangerous is to share your personal token.
 
 ## Deployment
 
