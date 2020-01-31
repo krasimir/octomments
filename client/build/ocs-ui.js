@@ -147,7 +147,7 @@
 
     api.noUser = function (url) {
       empty($container);
-      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <a name=\"octomments-new-comment\"></a>\n          <div class=\"").concat(PREFIX, "avatar_placeholder\"></div>\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\" id=\"octomments-new-comment\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Log in and comment</button>\n        </div>\n      "));
+      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <a id=\"octomments-new-comment\"></a>\n          <div class=\"").concat(PREFIX, "avatar_placeholder\"></div>\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Log in and comment</button>\n        </div>\n      "));
       setupForm(function () {
         window.location.href = url;
       });
@@ -161,7 +161,7 @@
       }
 
       empty($container);
-      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <a name=\"octomments-new-comment\"></a>\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\" id=\"octomments-new-comment\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n          <a href=\"javascript:void(0);\" id=\"").concat(PREFIX, "logout\" class=\"").concat(PREFIX, "right ").concat(PREFIX, "logout\"><small>Log out</small></a>\n        </div>\n      "));
+      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <a id=\"octomments-new-comment\"></a>\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n          <a href=\"javascript:void(0);\" id=\"").concat(PREFIX, "logout\" class=\"").concat(PREFIX, "right ").concat(PREFIX, "logout\"><small>Log out</small></a>\n        </div>\n      "));
       setupForm(function (text) {
         octomments.add(text);
       });
