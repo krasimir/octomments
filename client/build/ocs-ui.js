@@ -42,6 +42,15 @@
       console.warn("Octomments: ".concat(sel, " element doesn't exists in the DOM"));
     }
   }
+  function onChange(sel, callback) {
+    var el = $(sel);
+
+    if (el) {
+      el.addEventListener('keyup', callback);
+    } else {
+      console.warn("Octomments: ".concat(sel, " element doesn't exists in the DOM"));
+    }
+  }
 
   function Comments($container, octomments) {
     var api = {};
@@ -101,9 +110,35 @@
     return api;
   }
 
+  var TEXT = 'OCTOMMENTS_NEW_COMMENT_TEXT';
   function NewComment($container, octomments) {
     var api = {};
     $container.style.display = 'none';
+
+    function setupForm(onSubmit) {
+      var initialValue = octomments.LS.getItem(TEXT) || '';
+      var button = $("#".concat(PREFIX, "_submit_comment"));
+      var textarea = $("#".concat(PREFIX, "_textarea"));
+      onClick("#".concat(PREFIX, "_submit_comment"), function () {
+        button.disabled = true;
+        onSubmit(textarea.value);
+      });
+      onChange("#".concat(PREFIX, "_textarea"), function (e) {
+        if (e.target.value === '') {
+          button.disabled = true;
+        } else {
+          button.disabled = false;
+        }
+
+        octomments.LS.setItem(TEXT, e.target.value);
+      });
+
+      if (initialValue === '') {
+        button.disabled = true;
+      } else {
+        textarea.value = initialValue;
+      }
+    }
 
     api.loading = function () {
       empty($container);
@@ -112,7 +147,10 @@
 
     api.noUser = function (url) {
       empty($container);
-      createEl('div', 'tar', $container, "<a href=\"".concat(url, "\" class=\"").concat(PREFIX, "as-button\">&#x271A; new comment</a>"));
+      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <a name=\"#octomments-new-comment\"></a>\n          <div class=\"").concat(PREFIX, "avatar_placeholder\"></div>\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Log in and comment</button>\n        </div>\n      "));
+      setupForm(function () {
+        window.location.href = url;
+      });
     };
 
     api.form = function () {
@@ -123,13 +161,9 @@
       }
 
       empty($container);
-      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n          <a href=\"javascript:void(0);\" id=\"").concat(PREFIX, "logout\" class=\"").concat(PREFIX, "right ").concat(PREFIX, "logout\"><small>Log out</small></a>\n        </div>\n    "));
-      onClick("#".concat(PREFIX, "_submit_comment"), function () {
-        var text = $("#".concat(PREFIX, "_textarea")).value;
-
-        if (text !== '') {
-          octomments.add(text);
-        }
+      createEl('div', 'comment', $container, "\n        <div class=\"".concat(PREFIX, "comment_left\" id=\"").concat(PREFIX, "new_comment\">\n          <a name=\"#octomments-new-comment\"></a>\n          <img src=\"").concat(user.avatarUrl, "\" />\n        </div>\n        <div class=\"").concat(PREFIX, "comment_right\">\n          <textarea id=\"").concat(PREFIX, "_textarea\" placeholder=\"I think ...\"></textarea>\n          <button id=\"").concat(PREFIX, "_submit_comment\">Comment</button>\n          <a href=\"javascript:void(0);\" id=\"").concat(PREFIX, "logout\" class=\"").concat(PREFIX, "right ").concat(PREFIX, "logout\"><small>Log out</small></a>\n        </div>\n      "));
+      setupForm(function (text) {
+        octomments.add(text);
       });
       onClick("#".concat(PREFIX, "logout"), function () {
         octomments.logout();
