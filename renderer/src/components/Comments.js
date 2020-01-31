@@ -16,7 +16,7 @@ export default function Comments($container, octomments) {
         `
       <div>Loading comments ...</div>
         <div>
-          <a href="https://octomments.now.sh/" target="_blank">
+          <a href="https://ocs.now.sh/" target="_blank">
             ${GITHUB(14)}
           </a>
         </div>`
@@ -46,7 +46,7 @@ export default function Comments($container, octomments) {
         arr.length !== 1 ? 's' : ''
       }</div>
         <div>
-          <a href="https://octomments.now.sh/" target="_blank">
+          <a href="https://ocs.now.sh/" target="_blank">
             ${GITHUB(14)}
           </a>
         </div>

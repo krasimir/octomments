@@ -60,7 +60,7 @@
     api.loading = function () {
       if (arr.length === 0) {
         empty($container);
-        createEl('div', 'summary', $container, "\n      <div>Loading comments ...</div>\n        <div>\n          <a href=\"https://octomments.now.sh/\" target=\"_blank\">\n            ".concat(GITHUB(14), "\n          </a>\n        </div>"));
+        createEl('div', 'summary', $container, "\n      <div>Loading comments ...</div>\n        <div>\n          <a href=\"https://ocs.now.sh/\" target=\"_blank\">\n            ".concat(GITHUB(14), "\n          </a>\n        </div>"));
       } else {
         $moreCommentsLink.innerHTML = "\n        <div></div>\n        <div class=\"".concat(PREFIX, "more-comments-loading\"><small>loading ...</small></div>\n      ");
       }
@@ -77,7 +77,7 @@
     api.data = function (data, pagination) {
       arr = arr.concat(data);
       empty($container);
-      createEl('div', 'summary', $container, "\n        <div id=\"".concat(PREFIX, "num-of-comments\">").concat(arr.length, " comment").concat(arr.length !== 1 ? 's' : '', "</div>\n        <div>\n          <a href=\"https://octomments.now.sh/\" target=\"_blank\">\n            ").concat(GITHUB(14), "\n          </a>\n        </div>\n      "));
+      createEl('div', 'summary', $container, "\n        <div id=\"".concat(PREFIX, "num-of-comments\">").concat(arr.length, " comment").concat(arr.length !== 1 ? 's' : '', "</div>\n        <div>\n          <a href=\"https://ocs.now.sh/\" target=\"_blank\">\n            ").concat(GITHUB(14), "\n          </a>\n        </div>\n      "));
       arr.forEach(function (comment) {
         createEl('div', 'comment', $container, "\n          <div class=\"".concat(PREFIX, "comment_left\">\n            <img src=\"").concat(comment.author.avatarUrl, "\" />\n          </div>\n          <div class=\"").concat(PREFIX, "comment_right\">\n            <div class=\"").concat(PREFIX, "comment_heading\">\n              <strong>").concat(comment.author.login, "</strong>\n              <small> ~ ").concat(formatDate(comment.updatedAt), "</small>\n              <a href=\"").concat(comment.url, "\" target=\"_blank\" class=\"").concat(PREFIX, "right\">").concat(GITHUB(16), "</a>\n            </div>\n            <div class=\"").concat(PREFIX, "comment_body\">\n              ").concat(comment.body, "\n            </div>\n          </div>\n        "));
       });
