@@ -88,11 +88,11 @@ curl --location --request GET 'https://<url>/octomments/issue?number=<issue numb
 curl --location --request POST 'https://<url>/octomments/issue' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-	"title": "<string>",
-	"body": "<string>",
-	"password": "<your password here>",
-	"owner": "<owner>",
-	"repo": "<repo>"
+"title": "<string>",
+"body": "<string>",
+"password": "<your password here>",
+"owner": "<owner>",
+"repo": "<repo>"
 }'
 ```
 
