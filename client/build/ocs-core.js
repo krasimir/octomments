@@ -358,8 +358,7 @@
         pagination: null
       },
       options: options,
-      LS: Storage(),
-      version: '0.3.21'
+      LS: Storage()
     };
 
     api.error = function (e, meta) {
@@ -454,6 +453,7 @@
   CONSTANTS.forEach(function (c) {
     return Octomments[c] = c;
   });
+  Octomments.version = '0.3.22';
 
   return Octomments;
 

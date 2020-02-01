@@ -27,7 +27,6 @@ function Octomments(options) {
     data: { comments: [], pagination: null },
     options,
     LS: Storage(),
-    version: '{version}',
   };
 
   api.error = (e, meta) => {
@@ -89,4 +88,7 @@ function Octomments(options) {
 }
 
 CONSTANTS.forEach(c => (Octomments[c] = c));
+
+Octomments.version = '{version}';
+
 export default Octomments;
