@@ -59,7 +59,7 @@
         github = _octomments$options.github;
     var owner = github.owner,
         repo = github.repo;
-    var repoURL = "https://github.com/".concat(owner, "/").concat(repo, "/issues");
+    var repoURL = "https://github.com/".concat(owner, "/").concat(repo, "/issues/").concat(number);
     var $moreCommentsLink;
     var arr = [];
 

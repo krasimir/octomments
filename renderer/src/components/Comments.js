@@ -5,7 +5,7 @@ export default function Comments($container, octomments) {
   const api = {};
   const { number, github } = octomments.options;
   const { owner, repo } = github;
-  const repoURL = `https://github.com/${owner}/${repo}/issues`;
+  const repoURL = `https://github.com/${owner}/${repo}/issues/${number}`;
   let $moreCommentsLink;
   let arr = [];
 
