@@ -175,7 +175,6 @@
 
       if (focusTextArea) {
         setTimeout(function () {
-          console.log($("#".concat(PREFIX, "_textarea")));
           $("#".concat(PREFIX, "_textarea")).focus();
         }, 100);
       }

@@ -93,7 +93,6 @@ export default function NewComment($container, octomments) {
     });
     if (focusTextArea) {
       setTimeout(() => {
-        console.log($(`#${PREFIX}_textarea`));
         $(`#${PREFIX}_textarea`).focus();
       }, 100);
     }

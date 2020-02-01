@@ -73,3 +73,32 @@ octomments.init();
 ## Local development
 
 After the setup you have to create an `api/config.local.json` file. Again you'll need a password, personal token and Github OAuth app created. After that just run `now dev`.
+
+## Exposed endpoints
+
+### Getting a GitHub issue comments
+
+```
+curl --location --request GET 'https://<url>/octomments/issue?number=<issue number>&owner=<owner>&repo=<repo>'
+```
+
+### New GitHub issue
+
+```
+curl --location --request POST 'http://localhost:3000/octomments/issue' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+	"title": "<string>",
+	"body": "<string>",
+	"password": "<your password here>",
+	"owner": "<owner>",
+	"repo": "<repo>"
+}'
+```
+
+### Authorization
+
+```
+curl --location --request GET 'https://<url>/octomments/token?redirect=<url>'
+```
+
