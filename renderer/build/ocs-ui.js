@@ -54,13 +54,19 @@
 
   function Comments($container, octomments) {
     var api = {};
+    var _octomments$options = octomments.options,
+        number = _octomments$options.number,
+        github = _octomments$options.github;
+    var owner = github.owner,
+        repo = github.repo;
+    var repoURL = "https://github.com/".concat(owner, "/").concat(repo, "/issues");
     var $moreCommentsLink;
     var arr = [];
 
     api.loading = function () {
       if (arr.length === 0) {
         empty($container);
-        createEl('div', 'summary', $container, "\n      <div>Loading comments ...</div>\n        <div>\n          <a href=\"https://ocs.now.sh/\" target=\"_blank\">\n            ".concat(GITHUB(14), "\n          </a>\n        </div>"));
+        createEl('div', 'summary', $container, "\n      <div>Loading comments ...</div>\n        <div>\n          <a href=\"".concat(repoURL, "\" target=\"_blank\">\n            ").concat(GITHUB(14), "\n          </a>\n        </div>"));
       } else {
         $moreCommentsLink.innerHTML = "\n        <div></div>\n        <div class=\"".concat(PREFIX, "more-comments-loading\"><small>loading ...</small></div>\n      ");
       }
@@ -77,7 +83,7 @@
     api.data = function (data, pagination) {
       arr = arr.concat(data);
       empty($container);
-      createEl('div', 'summary', $container, "\n        <div id=\"".concat(PREFIX, "num-of-comments\">").concat(arr.length, " comment").concat(arr.length !== 1 ? 's' : '', "</div>\n        <div>\n          <a href=\"https://ocs.now.sh/\" target=\"_blank\">\n            ").concat(GITHUB(14), "\n          </a>\n        </div>\n      "));
+      createEl('div', 'summary', $container, "\n        <div id=\"".concat(PREFIX, "num-of-comments\">").concat(arr.length, " comment").concat(arr.length !== 1 ? 's' : '', "</div>\n        <div>\n          <a href=\"").concat(repoURL, "\" target=\"_blank\">\n            ").concat(GITHUB(14), "\n          </a>\n        </div>\n      "));
       arr.forEach(function (comment) {
         createEl('div', 'comment', $container, "\n          <div class=\"".concat(PREFIX, "comment_left\">\n            <img src=\"").concat(comment.author.avatarUrl, "\" />\n          </div>\n          <div class=\"").concat(PREFIX, "comment_right\">\n            <div class=\"").concat(PREFIX, "comment_heading\">\n              <strong>").concat(comment.author.login, "</strong>\n              <small> ~ ").concat(formatDate(comment.updatedAt), "</small>\n              <a href=\"").concat(comment.url, "\" target=\"_blank\" class=\"").concat(PREFIX, "right\">").concat(GITHUB(16), "</a>\n            </div>\n            <div class=\"").concat(PREFIX, "comment_body\">\n              ").concat(comment.body, "\n            </div>\n          </div>\n        "));
       });
@@ -96,12 +102,10 @@
     }
 
     octomments.on(octomments.ERROR, function (e, type) {
-      var _octomments$options = octomments.options,
-          number = _octomments$options.number,
-          github = _octomments$options.github;
+      console.log('-errror', e, type);
 
       if (type === 1) {
-        showError("Issue <strong>#".concat(number, "</strong> doesn't exists at <a href=\"https://github.com/").concat(github.owner, "/").concat(github.repo, "/issues\" target=\"_blank\">").concat(github.repo, " repo</a>."));
+        showError("Issue <strong>#".concat(number, "</strong> doesn't exists at <a href=\"https://github.com/").concat(owner, "/").concat(repo, "/issues\" target=\"_blank\">").concat(repo, " repo</a>."));
       } else if (type === 2 || type === 3 || type === 4) {
         showError("There is a problem fetching the comments. Wait a bit and click <a href=\"javascript:void(0);\" id=\"".concat(PREFIX, "comments_try_again\">here</a> to try again."));
         onClick("#".concat(PREFIX, "comments_try_again"), octomments.initComments);

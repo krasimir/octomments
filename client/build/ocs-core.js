@@ -358,7 +358,8 @@
         pagination: null
       },
       options: options,
-      LS: Storage()
+      LS: Storage(),
+      version: '0.3.21'
     };
 
     api.error = function (e, meta) {

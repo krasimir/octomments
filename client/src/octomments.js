@@ -27,6 +27,7 @@ function Octomments(options) {
     data: { comments: [], pagination: null },
     options,
     LS: Storage(),
+    version: '{version}',
   };
 
   api.error = (e, meta) => {

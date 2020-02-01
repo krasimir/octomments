@@ -3,6 +3,9 @@ import { createEl, empty, formatDate, onClick } from '../utils';
 
 export default function Comments($container, octomments) {
   const api = {};
+  const { number, github } = octomments.options;
+  const { owner, repo } = github;
+  const repoURL = `https://github.com/${owner}/${repo}/issues`;
   let $moreCommentsLink;
   let arr = [];
 
@@ -16,7 +19,7 @@ export default function Comments($container, octomments) {
         `
       <div>Loading comments ...</div>
         <div>
-          <a href="https://ocs.now.sh/" target="_blank">
+          <a href="${repoURL}" target="_blank">
             ${GITHUB(14)}
           </a>
         </div>`
@@ -46,7 +49,7 @@ export default function Comments($container, octomments) {
         arr.length !== 1 ? 's' : ''
       }</div>
         <div>
-          <a href="https://ocs.now.sh/" target="_blank">
+          <a href="${repoURL}" target="_blank">
             ${GITHUB(14)}
           </a>
         </div>
@@ -102,12 +105,10 @@ export default function Comments($container, octomments) {
   }
 
   octomments.on(octomments.ERROR, (e, type) => {
-    const {
-      options: { number, github },
-    } = octomments;
+    console.log('-errror', e, type);
     if (type === 1) {
       showError(
-        `Issue <strong>#${number}</strong> doesn't exists at <a href="https://github.com/${github.owner}/${github.repo}/issues" target="_blank">${github.repo} repo</a>.`
+        `Issue <strong>#${number}</strong> doesn't exists at <a href="https://github.com/${owner}/${repo}/issues" target="_blank">${repo} repo</a>.`
       );
     } else if (type === 2 || type === 3 || type === 4) {
       showError(
