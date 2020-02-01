@@ -85,7 +85,7 @@ curl --location --request GET 'https://<url>/octomments/issue?number=<issue numb
 ### New GitHub issue
 
 ```
-curl --location --request POST 'http://localhost:3000/octomments/issue' \
+curl --location --request POST 'https://<url>/octomments/issue' \
 --header 'Content-Type: application/json' \
 --data-raw '{
 	"title": "<string>",
