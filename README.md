@@ -69,11 +69,13 @@ Because I wanted:
 
 ### Listing of comments
 
-When Octomments initializes it requests GitHub's v3 API based on the passed options. It gets the issue behind the provided number and its comments. The requests to GitHub's API have certain [limits](https://developer.github.com/v3/#rate-limiting). If the user is not logged in he/she can make up to 60 requests per hour. That's of course not so much and if the user reaches the limit a request to [ocs.now.sh/](https://ocs.now.sh/) is made. The API there is authorized to make up to 5000 requests per hour. Of course these 5000 requests are shared between all the people using the library. If you think that your users will hit the 60 requests limit I strongly recommend to spin up your own Octomments server. More about that [here](./server/README.md). It's not a big deal.
+When Octomments initializes it requests GitHub's v3 API based on the passed options. It gets the issue behind the provided number and its comments. The requests to GitHub's API have certain [limits](https://developer.github.com/v3/#rate-limiting). If the user is not logged in he/she can make up to 60 requests per hour. That's of course not so much and if the user reaches the limit a request to [ocs.now.sh/](https://ocs.now.sh) is made. The API there is authorized to make up to 5000 requests per hour. Of course these 5000 requests are shared between all the people using the library. If you think that your users will hit the 60 requests limit I strongly recommend to spin up your own Octomments server. More about that [here](./server/README.md). It's not a big deal.
 
 ### Adding new comment
 
-Your users need to be authenticated in order to post new comments. The library offers a free endpoint which helps getting a GitHub auth token. There is an endpoint at [ocs.now.sh](https://ocs.now.sh/) which implements GitHub's [web application](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow) authentication mechanism. The users will authenticate the [Octomments app](https://github.com/apps/octomments) to make a comment. If you want to have your company logo/name to appear when the user is asked to grant access you need to create your own GitHub app. In this case you have to spin up your own Octomments server. Again more about that [here](./server/README.md).
+Your users need to be authenticated in order to post new comments. The library offers a free endpoint which helps getting a GitHub auth token. There is an endpoint at [ocs.now.sh](https://ocs.now.sh/) which implements GitHub's [web application](https://developer.github.com/apps/building-oauth-apps/authorizing-oauth-apps/#web-application-flow) authentication mechanism. The users will authenticate the [Octomments app](https://github.com/apps/octomments) to make a comment on their behalf. That same app **have to be installed** on the repo which you are going to use as a host of your comments. You'll see that during installation but I'll mention it here - the app has only read/write access to the issues of your repo.
+
+*If you want to have your company logo/name to appear when the user is asked to grant access you need to create your own GitHub app. In this case you have to spin up your own Octomments server. Again more about that [here](./server/README.md).*
 
 ## Assets
 
@@ -110,7 +112,7 @@ Nope. This is not happening automatically. You have two options. Either you crea
 
 ### What is the bare minimum to get Octomments on my page anyway?
 
-The [How to use it](#how-to-use-it) section above explains it well. You have to include two files on your page, pick a DOM element as a placeholder and run a few lines of JavaScript in a `<script>` tag.
+The [How to use it](#how-to-use-it) section above explains it well. You have to install the [Octomments app](https://github.com/apps/octomments) on your repo. Then include two files on your page, pick a DOM element as a placeholder and run a few lines of JavaScript.
 
 ### Can I use Octomments in my React/Vue/Angular/Svelt/<framework name here>?
 

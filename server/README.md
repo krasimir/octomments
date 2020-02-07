@@ -12,7 +12,7 @@ There is already an instance of this server deployed here [https://ocs.now.sh/](
 * The public server has a limit of 5000 request per hour. You may want to have your own 5000 request limit so you secure your users. Otherwise they'll be requesting in the same bucket as every other user using the public server.
 * The GitHub issues are not created automatically by Octomments. The server offers such endpoint. So, deploying your own means that you can use that endpoint to create an issue let's say when you add a new post to your blog.
 
-## Create GitHub App
+## Creating GitHub App
 
 Go here [https://github.com/settings/apps](github.com/settings/apps) and create a new app. A few things are important:
 
