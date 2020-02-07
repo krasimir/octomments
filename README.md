@@ -39,14 +39,16 @@ Because I wanted:
 
 ## How to use it
 
-There are two files that you need to include on your page:
+1. Go [here](https://github.com/apps/octomments) and install the Octomments GitHub App on the repo that will host your comments.
+
+2. Add these two files on your page:
 
 ```html
 <link rel="stylesheet" href="https://unpkg.com/octomments/build/ocs-ui.min.css" />
 <script src="https://unpkg.com/octomments/build/ocs.min.js"></script>
 ```
 
-Then you drop the following JavaScript:
+3. Then you drop the following JavaScript:
 
 ```html
 <script>

@@ -2,7 +2,8 @@
   "name": "octomments",
   "private": true,
   "scripts": {
-    "dev": "concurrently \"cd ./client && yarn dev\" \"cd ./renderer && yarn dev\" \"cd ./server && yarn dev\" \"cd ./_local && yarn dev\""
+    "dev": "concurrently \"cd ./client && yarn dev\" \"cd ./renderer && yarn dev\" \"cd ./server && yarn dev\" \"cd ./_local && yarn dev\"",
+    "release": "echo \"\n\nRun sh ./scripts/release.hs\n\n\""
   },
   "dependencies": {
     "concurrently": "5.1.0"
