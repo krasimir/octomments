@@ -184,11 +184,11 @@
         options = api.options,
         error = api.error;
     var endpoints = options.endpoints,
-        number = options.number,
+        issueNumber = options.issueNumber,
         github = options.github;
     var withServer = !!endpoints;
-    var commentsError = new Error("Error getting comments for issue #".concat(number, "."));
-    var doesntExist = new Error("Issue #".concat(number, " doesn't exists."));
+    var commentsError = new Error("Error getting comments for issue #".concat(issueNumber, "."));
+    var doesntExist = new Error("Issue #".concat(issueNumber, " doesn't exists."));
     notify(COMMENTS_LOADING);
 
     function catchErrorHandler(err) {
@@ -213,7 +213,7 @@
     }
 
     function getIssueCommentsV4() {
-      fetch("".concat(endpoints.issue, "?owner=").concat(github.owner, "&repo=").concat(github.repo, "&number=").concat(number)).then(processResponse(function (response) {
+      fetch("".concat(endpoints.issue, "?owner=").concat(github.owner, "&repo=").concat(github.repo, "&number=").concat(issueNumber)).then(processResponse(function (response) {
         if (!response.ok) {
           error(commentsError, 2);
         } else {
@@ -234,7 +234,7 @@
 
     function getIssueCommentsV3() {
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments?page=").concat(page);
+      var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(issueNumber, "/comments?page=").concat(page);
       fetch(url, {
         headers: api.getHeaders()
       }).then(processResponse(function (response) {
@@ -282,11 +282,11 @@
     var notify = api.notify,
         error = api.error,
         options = api.options;
-    var number = options.number,
+    var issueNumber = options.issueNumber,
         github = options.github;
     var failed = new Error('Adding a new comment failed.');
     notify(COMMENT_SAVING);
-    var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(number, "/comments");
+    var url = "https://api.github.com/repos/".concat(github.owner, "/").concat(github.repo, "/issues/").concat(issueNumber, "/comments");
 
     function catchErrorHandler(err) {
       console.error(err);
@@ -337,7 +337,7 @@
   function Octomments(options) {
     if (!options) throw new Error('Octomments options required.');
     if (!options.github || !options.github.owner || !options.github.repo) throw new Error('`options.github` is missing or incomplete.');
-    if (!options.number) throw new Error('`options.number` is missing.');
+    if (!options.issueNumber) throw new Error('`options.issueNumber` is missing.');
 
     if (!options.endpoints) {
       options.endpoints = {
@@ -453,7 +453,7 @@
   CONSTANTS.forEach(function (c) {
     return Octomments[c] = c;
   });
-  Octomments.version = '1.0.1';
+  Octomments.version = '1.0.2';
 
   return Octomments;
 

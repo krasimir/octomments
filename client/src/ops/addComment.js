@@ -3,12 +3,12 @@ import { normalizeComment } from '../utils';
 
 export default function addComment(api, text) {
   const { notify, error, options } = api;
-  const { number, github } = options;
+  const { issueNumber, github } = options;
   const failed = new Error('Adding a new comment failed.');
 
   notify(COMMENT_SAVING);
 
-  const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments`;
+  const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${issueNumber}/comments`;
 
   function catchErrorHandler(err) {
     console.error(err);

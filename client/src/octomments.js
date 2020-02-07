@@ -10,7 +10,8 @@ function Octomments(options) {
   if (!options) throw new Error('Octomments options required.');
   if (!options.github || !options.github.owner || !options.github.repo)
     throw new Error('`options.github` is missing or incomplete.');
-  if (!options.number) throw new Error('`options.number` is missing.');
+  if (!options.issueNumber)
+    throw new Error('`options.issueNumber` is missing.');
   if (!options.endpoints) {
     options.endpoints = {
       issue: 'https://ocs.now.sh/octomments/issue',

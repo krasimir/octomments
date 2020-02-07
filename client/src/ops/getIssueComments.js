@@ -3,12 +3,12 @@ import { parseLinkHeader, normalizeComment } from '../utils';
 
 export default function getIssueComments(api, p) {
   const { notify, options, error } = api;
-  const { endpoints, number, github } = options;
+  const { endpoints, issueNumber, github } = options;
   const withServer = !!endpoints;
   const commentsError = new Error(
-    `Error getting comments for issue #${number}.`
+    `Error getting comments for issue #${issueNumber}.`
   );
-  const doesntExist = new Error(`Issue #${number} doesn't exists.`);
+  const doesntExist = new Error(`Issue #${issueNumber} doesn't exists.`);
 
   notify(COMMENTS_LOADING);
 
@@ -33,7 +33,7 @@ export default function getIssueComments(api, p) {
 
   function getIssueCommentsV4() {
     fetch(
-      `${endpoints.issue}?owner=${github.owner}&repo=${github.repo}&number=${number}`
+      `${endpoints.issue}?owner=${github.owner}&repo=${github.repo}&number=${issueNumber}`
     )
       .then(
         processResponse(response => {
@@ -61,7 +61,7 @@ export default function getIssueComments(api, p) {
   }
 
   function getIssueCommentsV3(page = 1) {
-    const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${number}/comments?page=${page}`;
+    const url = `https://api.github.com/repos/${github.owner}/${github.repo}/issues/${issueNumber}/comments?page=${page}`;
     fetch(url, { headers: api.getHeaders() }).then(
       processResponse(response => {
         if (!response.ok) {

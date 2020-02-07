@@ -44,7 +44,7 @@ const octomments = Octomments({
     owner: '<username>',
     repo: '<repo name>',
   },
-  number: <issue number>,
+  issueNumber: <issue number>,
   renderer: [Renderer, '<selector>']
 });
 
@@ -54,7 +54,7 @@ octomments.init();
 ## Options
 
 * `github` (required) - object containing `owner` (GitHub username) and `repo` (GitHub repository) fields.
-* `number` (required) - the number of an existing in the repository issue
+* `issueNumber` (required) - the number of an existing in the repository issue
 * `renderer` (required) - an array where the first element is a renderer function and the second one is a valid DOM element selector.
 * `debug` (optional) - a boolean. If `true` the library will print each of the dispatched events.
 * `endpoints` (optional) - an object with `issue` and `token` fields. The values of these fields are valid URLs pointing to [Octomments server](../server) endpoints. You'll probably never need to setup those unless you deploy your own server. The already existing one is at `ocs.now.sh`.

@@ -57,7 +57,7 @@ Because I wanted:
       owner: '<username>',
       repo: '<repo name>',
     },
-    number: <issue number>,
+    issueNumber: <issue number>,
     renderer: [OctommentsRenderer, '<selector>']
   }).init();
 </script>
