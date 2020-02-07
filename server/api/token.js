@@ -43,7 +43,7 @@ module.exports = cors(async (req, res) => {
     const params = [
       `client_id=${config.github.id}`,
       `redirect_uri=${`${currentURL}`}`,
-      `scope=public_repo`,
+      `state=octomments`,
     ];
     res.writeHead(301, {
       Location: `https://github.com/login/oauth/authorize?${params.join('&')}`,

@@ -453,7 +453,7 @@
   CONSTANTS.forEach(function (c) {
     return Octomments[c] = c;
   });
-  Octomments.version = '0.3.24';
+  Octomments.version = '{version}';
 
   return Octomments;
 
