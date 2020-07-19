@@ -1065,9 +1065,9 @@ locate-path@^2.0.0:
     path-exists "^3.0.0"
 
 lodash@^4.17.11, lodash@^4.17.12, lodash@^4.17.13, lodash@^4.17.14:
-  version "4.17.15"
-  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
-  integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+  version "4.17.19"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.19.tgz#e48ddedbe30b3321783c5b4301fbd353bc1e4a4b"
+  integrity sha512-JNvd8XER9GQX0v2qJgsaN/mzFCNA5BRe/j8JN9d+tWyGLSodKQHKFicdwNYzWwI3wjRnaKPsGj1XkBjx/F96DQ==
 
 loose-envify@^1.4.0:
   version "1.4.0"
@@ -1081,14 +1081,7 @@ methods@^1.1.2:
   resolved "https://registry.yarnpkg.com/methods/-/methods-1.1.2.tgz#5529a4d67654134edcc5266656835b0f851afcee"
   integrity sha1-VSmk1nZUE07cxSZmVoNbD4Ua/O4=
 
-micro-cors-multiple-allow-origin@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/micro-cors-multiple-allow-origin/-/micro-cors-multiple-allow-origin-1.0.1.tgz#3a83d4cda225a0b292ff56d98aab6c1bf08bd549"
-  integrity sha512-d+UQs/F3xSu8ZOOX0M3ItDlRkzIbfwrD9UUBsJyKiXfwDkFLo3de6izt2xbUZwsJea77VVQYPAz/zQTY+XIBwg==
-  dependencies:
-    micro-cors "^0.1.0"
-
-micro-cors@0.1.1, micro-cors@^0.1.0:
+micro-cors@0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/micro-cors/-/micro-cors-0.1.1.tgz#af7a480182c114ffd1ada84ad9dffc52bb4f4054"
   integrity sha512-6WqIahA5sbQR1Gjexp1VuWGFDKbZZleJb/gy1khNGk18a6iN1FdTcr3Q8twaxkV5H94RjxIBjirYbWCehpMBFw==
