@@ -1,11 +1,11 @@
-import { PREFIX, GITHUB } from '../constants';
-import { createEl, empty, formatDate, onClick } from '../utils';
+import { PREFIX, GITHUB } from "../constants";
+import { createEl, empty, formatDate, onClick } from "../utils";
 
 export default function Comments($container, octomments) {
   const api = {};
-  const { number, github } = octomments.options;
+  const { issueNumber, github } = octomments.options;
   const { owner, repo } = github;
-  const repoURL = `https://github.com/${owner}/${repo}/issues/${number}`;
+  const repoURL = `https://github.com/${owner}/${repo}/issues/${issueNumber}`;
   let $moreCommentsLink;
   let arr = [];
 
@@ -13,8 +13,8 @@ export default function Comments($container, octomments) {
     if (arr.length === 0) {
       empty($container);
       createEl(
-        'div',
-        'summary',
+        "div",
+        "summary",
         $container,
         `
       <div>Loading comments ...</div>
@@ -34,19 +34,19 @@ export default function Comments($container, octomments) {
   api.noComments = () => {
     empty($container);
   };
-  api.newComment = newComments => {
+  api.newComment = (newComments) => {
     api.data(newComments);
   };
   api.data = (data, pagination) => {
     arr = arr.concat(data);
     empty($container);
     createEl(
-      'div',
-      'summary',
+      "div",
+      "summary",
       $container,
       `
         <div id="${PREFIX}num-of-comments">${arr.length} comment${
-        arr.length !== 1 ? 's' : ''
+        arr.length !== 1 ? "s" : ""
       }</div>
         <div>
           <a href="${repoURL}" target="_blank">
@@ -55,10 +55,10 @@ export default function Comments($container, octomments) {
         </div>
       `
     );
-    arr.forEach(comment => {
+    arr.forEach((comment) => {
       createEl(
-        'div',
-        'comment',
+        "div",
+        "comment",
         $container,
         `
           <div class="${PREFIX}comment_left">
@@ -81,7 +81,7 @@ export default function Comments($container, octomments) {
     });
     if (pagination && pagination.next) {
       $moreCommentsLink = createEl(
-        'div',
+        "div",
         `comment ${PREFIX}more-comments`,
         $container,
         `
@@ -101,11 +101,11 @@ export default function Comments($container, octomments) {
 
   function showError(str) {
     empty($container);
-    createEl('div', 'error', $container, `<div>${str}</div>`);
+    createEl("div", "error", $container, `<div>${str}</div>`);
   }
 
   octomments.on(octomments.ERROR, (e, type) => {
-    console.log('-errror', e, type);
+    console.log("-errror", e, type);
     if (type === 1) {
       showError(
         `Issue <strong>#${number}</strong> doesn't exists at <a href="https://github.com/${owner}/${repo}/issues" target="_blank">${repo} repo</a>.`
