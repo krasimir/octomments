@@ -12,13 +12,18 @@ There is already an instance of this server deployed here [https://ocs.now.sh/](
 * The public server has a limit of 5000 request per hour. You may want to have your own 5000 request limit so you secure your users. Otherwise they'll be requesting in the same bucket as every other user using the public server.
 * The GitHub issues are not created automatically by Octomments. The server offers such endpoint. So, deploying your own means that you can use that endpoint to create an issue let's say when you add a new post to your blog.
 
-## Creating GitHub App
+## Creating a GitHub App
 
-Go here [https://github.com/settings/apps](github.com/settings/apps) and create a new app. A few things are important:
+Go to [https://github.com/settings/apps](https://github.com/settings/apps) and create a new GitHub App. A few things are important:
 
 * Set `User authorization callback URL` to the URL of your Octomments server
-* `Webhook URL` is not important because we are not using it. Just use the address of your server.
-* Permissions - change only `Issues` to be `Read & write`
+* `Webhook URL` is not important because we are not using it. Just untick the Active checkbox in the Webhook section.
+* Permissions - change only `Issues` to be `Read & write`.
+
+After the GitHub App has been successfully created:
+
+1. Use the option on the App's settings page to generate a Private Key for it. You have to do this to be able to install your App.
+2. Use the 'Install App' option to install your App to your website's repository.
 
 ## Setup
 
@@ -46,8 +51,8 @@ A couple of new files will be created:
 Open `api/config.json` and let's fill the placeholders.
 
 * `password` - this password is here to protect the endpoint which creates GitHub issues. We don't want to expose this to everyone. The password is just a plain string and I know that it's not secure but this endpoint is suppose to be used in a machine-to-machine fashion. Happy to revisit this decision.
-* `github.token` - create a personal token here [https://github.com/settings/tokens](https://github.com/settings/tokens) and grant only `public_repo` permission. This token is used when fetching a GitHub issue.
-* `github.id` and `github.secret` - those are client id and client secret of a GitHub app. Create one here [https://github.com/settings/developers](https://github.com/settings/developers). Make sure to set a proper `Authorization callback URL`. That's the url of the site which will use your server.
+* `github.token` - Create a personal token here [https://github.com/settings/tokens](https://github.com/settings/tokens) and grant only `public_repo` permission. This token is used when fetching a GitHub issue.
+* `github.id` and `github.secret` - These are client id and client secret of the GitHub App that you created earlier.
 
 Note: `api/config.json` and `api/config.local.json` are gitignored. You SHOULD NOT share these files with third parties. Do not upload them in public places. Especially dangerous is to share your personal token.
 
@@ -109,4 +114,3 @@ curl --location --request POST 'https://<url>/octomments/issue' \
 ```
 curl --location --request GET 'https://<url>/octomments/token?redirect=<url>'
 ```
-
