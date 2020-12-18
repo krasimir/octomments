@@ -215,8 +215,8 @@
     return api;
   }
 
-  function OctommentsRenderer(octomments, containerSelector) {
-    var $container = $(containerSelector);
+  function OctommentsRenderer(octomments, container) {
+    var $container = container instanceof HTMLElement ? container : $(container);
 
     if (!$container) {
       throw new Error('Octomments: invalid container selector.');
