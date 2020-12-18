@@ -3,8 +3,8 @@ import { createEl, $ } from './utils';
 import Comments from './components/Comments';
 import NewComment from './components/NewComment';
 
-function OctommentsRenderer(octomments, containerSelector) {
-  const $container = $(containerSelector);
+function OctommentsRenderer(octomments, container) {
+  const $container = container instanceof HTMLElement ? container : $(container);
   if (!$container) {
     throw new Error('Octomments: invalid container selector.');
   }
